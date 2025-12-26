@@ -1,0 +1,369 @@
+body {
+    background-image: url('./images/background.jpg');
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    background-size: cover;
+    background-position:top center;
+
+}
+
+.nameinput-box {
+    width: 10rem;
+    height: 2rem;
+    color: rgb(190, 190, 190);
+    background-color:  rgb(30, 30, 30);
+    text-align: center;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    border: solid 2px;
+    border-color: rgb(100, 100, 100);
+}
+
+.leaderboard-table {
+    text-align: center;
+    color: rgb(190, 190, 190);
+    border: none;
+}
+
+.leaderboard-table ul {
+    color: rgb(190, 190, 190);
+    list-style: none;
+    padding-left: 0;
+    margin: 10px;
+    display: inline-block;
+    border: none;
+}
+
+.leaderboard-table li {
+    color: rgb(190, 190, 190);
+    margin: 4px 0;
+    border: none;
+}
+
+.leaderboard-screen {
+    background-color: rgb(30, 30, 30);
+    border-radius: 0.5rem;
+    border: 10px double rgb(100, 100, 100);
+    min-width: 20rem;
+}
+
+.gameover-table {
+    background-color: rgb(30, 30, 30);
+    border: none;
+    border-radius: 0.5rem;
+    margin: 10px;
+}
+
+.gameover-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2px;
+    margin-bottom: 5px;
+
+    height: 2rem;
+    font-size: 1.5rem;
+    color: rgb(190, 190, 190);
+}
+
+.gameover-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2px;
+    margin-bottom: 5px;
+
+    height: 2rem;
+    border: solid 2px;
+    border-radius: 0.5rem;
+    border-color: rgb(100, 100, 100);
+    background-color: rgba(50, 50, 50, 0.75);
+
+    font-size: 1.5rem;
+    color: rgb(190, 190, 190);
+}
+
+.button2-container {
+    border: none;
+    background: none;
+    font-size: 1rem;
+    color:black;
+}
+
+.rollbtn-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+
+    height: 2.5rem;
+    border: solid 2px;
+    border-radius: 0.5rem;
+    border-color: rgb(100, 100, 100);
+
+    color: rgb(190, 190, 190);
+    background-color: rgba(50, 50, 50, 0.75);
+    font-size: 1.5rem;
+}
+
+.restart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 8px;
+    margin-bottom: 5px;
+
+    height: 2rem;
+    border: solid 2px;
+    border-radius: 0.5rem;
+    border-color: rgb(100, 100, 100);
+
+    color: rgb(190, 190, 190);
+    background-color: rgba(50, 50, 50, 0.75);
+    font-size: 1.5rem;
+}
+
+.dice-container {
+    display: inline-block;
+    margin: auto;
+    margin-top: 3px;
+    margin-left: -10px;
+    margin-right: -10px;
+    font-size: 1.1rem ;
+    color: white;
+    text-shadow: -1px 1px 0 #000, 1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;
+}
+
+.scoreboard-container {
+    color: rgb(190, 190, 190);
+    background-color: rgb(100, 100, 100);
+    border: 10px double rgb(100, 100, 100);
+    margin: auto;
+}
+
+.scoreboard1-container {
+    color: rgb(190, 190, 190);
+    background-color: rgb(30, 30, 30);
+    border: 2px solid rgb(100, 100, 100);
+}
+
+.scoreboard2-container {
+    color: rgb(190, 190, 190);
+    background-color: rgb(30, 30, 30);
+    border: 2px solid rgb(100, 100, 100);
+}
+
+.scoreboard3-container {
+    color: rgb(190, 190, 190);
+    background-color: rgb(30, 30, 30);
+    border: 2px solid rgb(100, 100, 100);
+}
+
+.scoreboard4-container {
+    color: rgb(190, 190, 190);
+    background-color: rgb(30, 30, 30);
+    border: 2px solid rgb(100, 100, 100);
+}
+
+table {
+    border-collapse: collapse;
+    align-self: center;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+th, td {
+    border: 1px solid rgb(100, 100, 100);
+    padding: 0.2rem;
+    text-align: center;
+}
+
+td img {
+    width: 100%;
+    display: block;
+    margin: auto;
+}
+
+.select-container {
+    color: rgb(190, 190, 190);
+    border: none;
+    background: none;
+    font-size: 1.1rem;
+}
+
+.dice0 {
+    background-image: url('./images/dice0.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice1{
+    background-image: url('./images/dice1.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice2{
+    background-image: url('./images/dice2.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice3{
+    background-image: url('./images/dice3.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice4{
+    background-image: url('./images/dice4.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice5{
+    background-image: url('./images/dice5.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dice6{
+    background-image: url('./images/dice6.png');
+    height: 50px;
+    width: 50px;
+    background-size: cover;
+}
+
+.dices1{
+    background-image: url('./images/dice11.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.dices2{
+    background-image: url('./images/dice22.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.dices3{
+    background-image: url('./images/dice33.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.dices4{
+    background-image: url('./images/dice44.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.dices5{
+    background-image: url('./images/dice55.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.dices6{
+    background-image: url('./images/dice66.png');
+    height: 30px;
+    width: 150px;
+    background-size: cover;
+}
+
+.pair {
+    background-image: url('./images/pair.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.doublepair {
+    background-image: url('./images/doublepair.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.triples {
+    background-image: url('./images/triples.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.quadruples {
+    background-image: url('./images/quadruples.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.smallstraight {
+    background-image: url('./images/smallstraight.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.bigstraight {
+    background-image: url('./images/bigstraight.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.fullhouse {
+    background-image: url('./images/fullhouse.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.sattuma {
+    background-image: url('./images/sattuma.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px; 
+}
+
+.jatsi {
+    background-image: url('./images/jatsi.png');
+    background-size: cover;
+    height: 30px;
+    width: 150px;
+}
+
+.locked {
+    display: flex;
+    align-items: center;
+    background-image: url('./images/locked.png');
+    background-size: cover;
+    height: 40px;
+    width: 40px;
+    margin-top: -3.5rem;
+    margin-left: 24px;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
