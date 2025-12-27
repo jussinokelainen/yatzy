@@ -1,23 +1,12 @@
-import { saveScore, loadLb } from './dbfetch'
-import { total, subTotal, updateTotal, resetTotal, resetSubTotal } from "./totals";
+import './App.css'
 import Button from './buttons/button'
 import Button2 from './buttons/button2'
-import { Total, Scoreboard } from './scoreboard'
 import { useState } from 'react'
-import './App.css'
-
-const values = new Map([[1, 0], [2, 0], [3, 0], [4, 0], [5, 0],]);
-const startLockMap = new Map([[1, true], [2, true], [3, true], [4, true], [5, true],]);
-const startValues = new Map([[1, 0], [2, 0], [3, 0], [4, 0], [5, 0],]);
-const diceImages = new Map([
-  [0, 'dice0'],
-  [1, 'dice1'],
-  [2, 'dice2'],
-  [3, 'dice3'],
-  [4, 'dice4'],
-  [5, 'dice5'],
-  [6, 'dice6'],
-]);
+import { saveScore, loadLb } from './dbfetch'
+import { Total, Scoreboard } from './scoreboard'
+import { resetTotal, resetSubTotal } from "./totals";
+import { values, startValues, startLockMap, diceImages } from './valuemaps'
+import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 
 function refreshValues(newValues) {
   values.set(1, newValues.get(1));
@@ -69,10 +58,6 @@ const App = () => {
     setDiceState(nextValues)
   }
 
-  function updateDice() {
-    setDiceState(values)
-  }
-
   function rollDice() {
     if (rollCount >= 3) {
       return;
@@ -84,7 +69,7 @@ const App = () => {
     setTimeout(rollAllOnce, 600)
     setTimeout(rollAllOnce, 800)
     setTimeout(rollAllOnce, 1000)
-    setTimeout(updateDice, 1100)
+    setTimeout(setDiceState(values), 1100)
 
     setRollCount(prevCount => prevCount + 1);
   };
@@ -103,6 +88,12 @@ const App = () => {
 
   function startGame() {
     setNameIsSet(true)
+    const hasKey = checkUserKey()
+    try {
+      hasKey ? console.log(`key exists: ${getUserKey()}`) : createUserKey()
+    } catch (e) {
+      console.log('Cannot access localStorage:', e);
+    }
   }
 
   function showLeaderBoard() {
@@ -215,7 +206,7 @@ const App = () => {
   }
 
   // End of game screen
-  saveScore(name, Number(Total()))
+  saveScore(name, Number(Total()), getUserKey())
   return (
     <div>
       <table className="gameover-table">
