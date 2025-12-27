@@ -34,17 +34,18 @@ export const addResult = (name, score) => {
 
 export const showResults = () => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT * FROM results ORDER BY score DESC LIMIT 10;", (error, results) => {
-      if (error) {
-        return reject(error);
-      }
+    pool.query("SELECT name, MAX(score) AS score FROM results GROUP BY name ORDER BY score DESC LIMIT 20;",
+      (error, results) => {
+        if (error) {
+          return reject(error);
+        }
 
-      if (results && results.rows) {
-        // Return the full array of rows
-        resolve(results.rows);
-      } else {
-        reject(new Error("No results found"));
-      }
-    });
+        if (results && results.rows) {
+          // Return the full array of rows
+          resolve(results.rows);
+        } else {
+          reject(new Error("No results found"));
+        }
+      });
   });
 };

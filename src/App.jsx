@@ -155,7 +155,7 @@ const App = () => {
           <tbody>
             <tr>
               <td className="leaderboard-screen">
-                <p className="gameover-text">Top 10 scores</p>
+                <p className="gameover-text">Top 20 players</p>
               </td>
             </tr>
             <tr>

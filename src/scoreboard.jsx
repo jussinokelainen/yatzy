@@ -86,12 +86,12 @@ export function Scoreboard(props) {
             </tbody>
             <tbody className="scoreboard2-container">
                 <tr>
-                    <td>Total</td>
-                    <td>{subTotal}</td>
-                </tr>
-                <tr>
                     <td>Bonus</td>
                     <td><Bonus /></td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>{subTotal}</td>
                 </tr>
             </tbody>
             <tbody className="scoreboard3-container">

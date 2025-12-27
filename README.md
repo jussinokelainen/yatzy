@@ -1,2 +1,2 @@
-# Yahtzee web app
+# Yatzy web app
     made with react and vite, using a postgres database
