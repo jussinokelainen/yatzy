@@ -11,13 +11,13 @@ import Sattumabutton from "./buttons/combinations/sattumabutton";
 import Numberbuttons from "./buttons/numberbuttons";
 
 
-const Bonus = () => {
+function Bonus() {
     if (subTotal < 63) {
         return 0
     } else return 50
 }
 
-const Total = () => {
+export function Total() {
     if (subTotal < 63) {
         return subTotal + total
     } else return (
@@ -25,7 +25,7 @@ const Total = () => {
     )
 }
 
-const Scoreboard = (props) => {
+export function Scoreboard(props) {
     return (
         <table className="scoreboard-container">
             <tbody className="scoreboard1-container">
@@ -177,5 +177,3 @@ const Scoreboard = (props) => {
         </table>
     )
 }
-
-export default Scoreboard

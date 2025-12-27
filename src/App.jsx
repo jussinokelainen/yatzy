@@ -1,12 +1,13 @@
-import { total, subTotal } from "./totals";
 import { saveScore, loadLb } from './dbfetch'
+import { total, subTotal, updateTotal, resetTotal, resetSubTotal } from "./totals";
 import Button from './buttons/button'
 import Button2 from './buttons/button2'
-import Scoreboard from './scoreboard'
+import { Total, Scoreboard } from './scoreboard'
 import { useState } from 'react'
 import './App.css'
 
 const values = new Map([[1, 0], [2, 0], [3, 0], [4, 0], [5, 0],]);
+const startLockMap = new Map([[1, true], [2, true], [3, true], [4, true], [5, true],]);
 const startValues = new Map([[1, 0], [2, 0], [3, 0], [4, 0], [5, 0],]);
 const diceImages = new Map([
   [0, 'dice0'],
@@ -18,46 +19,48 @@ const diceImages = new Map([
   [6, 'dice6'],
 ]);
 
-function refreshValues(nextValues) {
-  values.set(1, nextValues.get(1));
-  values.set(2, nextValues.get(2));
-  values.set(3, nextValues.get(3));
-  values.set(4, nextValues.get(4));
-  values.set(5, nextValues.get(5));
-}
-
-const Total = () => {
-  if (subTotal < 63) {
-    return subTotal + total
-  } else return (
-    subTotal + 50 + total
-  )
-}
-
-function restartGame() {
-  window.location.reload()
+function refreshValues(newValues) {
+  values.set(1, newValues.get(1));
+  values.set(2, newValues.get(2));
+  values.set(3, newValues.get(3));
+  values.set(4, newValues.get(4));
+  values.set(5, newValues.get(5));
 }
 
 const App = () => {
   const [diceState, setDiceState] = useState(values);
+  const [lockState, setLockState] = useState(startLockMap);
   const [name, setName] = useState('');
   const [nameIsSet, setNameIsSet] = useState(false);
-  const [locked, setLocked] = useState([false, false, false, false, false])
   const [roundNum, setRoundNum] = useState(0);
   const [showLb, setShowLb] = useState(false);
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
 
+  function restartGame() {
+    setNameIsSet(false)
+    setRoundNum(0)
+    setShowLb(false)
+    setLockState(startLockMap)
+    setDiceState(startValues)
+    refreshValues(startValues)
+    setRollCount(0)
+    resetTotal()
+    resetSubTotal()
+  }
 
-  const toggleLock = (index) => {
-    setLocked(prevLocked => prevLocked.map((lock, i) => i === index ? !lock : lock));
+  function toggleLock(i) {
+    const newLockMap = new Map(lockState)
+    const current = lockState.get(i)
+    newLockMap.set(i, !current)
+    setLockState(newLockMap)
   };
 
-  const rollAllOnce = () => {
+  function rollAllOnce() {
     const nextValues = new Map(values)
 
     for (let i = 1; i <= 5; i++) {
-      if (!locked[i]) {
+      if (lockState.get(i)) {
         const newValue = Math.floor(Math.random() * 6) + 1;
         nextValues.set(i, newValue);
       }
@@ -66,13 +69,11 @@ const App = () => {
     setDiceState(nextValues)
   }
 
-  const updateDice = () => {
+  function updateDice() {
     setDiceState(values)
-    console.log('Dice were updated to')
-    console.log(values)
   }
 
-  const rollDice = () => {
+  function rollDice() {
     if (rollCount >= 3) {
       return;
     }
@@ -88,23 +89,23 @@ const App = () => {
     setRollCount(prevCount => prevCount + 1);
   };
 
-  const handleReset = () => {
+  function handleReset() {
     refreshValues(startValues)
-    setLocked([false, false, false, false, false])
+    setLockState(startLockMap)
     setRollCount(0)
     setRoundNum(roundNum + 1)
   }
 
-  const RollsLeft = () => {
+  function RollsLeft() {
     return 3 - rollCount
   }
 
 
-  const startGame = () => {
+  function startGame() {
     setNameIsSet(true)
   }
 
-  const showLeaderBoard = () => {
+  function showLeaderBoard() {
     loadLb(setLbScores)
     setNameIsSet(true)
     setShowLb(true)
@@ -123,7 +124,12 @@ const App = () => {
             </tr>
             <tr>
               <td className="gameover-table">
-                <input onChange={e => setName(e.target.value)} className="nameinput-box" />
+                <input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="nameinput-box"
+                  onFocus={() => { setName('') }}
+                />
               </td>
             </tr>
             <tr>
@@ -197,7 +203,7 @@ const App = () => {
                 {Array.from(diceState.entries()).map(([i, value]) => (
                   <div className='dice-container' key={i}>
                     {<Button2 handleClick={() => toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
-                    <div className={locked[i] ? 'locked' : null} />
+                    <div className={lockState.get(i) ? null : 'locked'} />
                   </div>
                 ))}
               </td>

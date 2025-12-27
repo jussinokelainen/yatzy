@@ -3,17 +3,24 @@ import { updateTotal } from "../../totals";
 
 const Sum = (props) => {
   const values = props.values
-  for (let i = 0; i < values.length - 2; i++) {
-    for (let j = i + 1; j < values.length - 1; j++) {
-      for (let k = j + 1; k < values.length; k++) {
-        if (values[i] === values[j] && values[j] === values[k]) {
-          const tripleValue = values[i];
-          const tripleSum = tripleValue * 3;
-          return tripleSum;
-        }
-      }
+  const counts = {};
+
+  for (let i = 0; i < values.length; i++) {
+    if (counts[values[i]]) {
+      counts[values[i]]++;
+    } else {
+      counts[values[i]] = 1;
     }
   }
+
+  let triplesValue = 0;
+  for (const value in counts) {
+    if (counts[value] >= 3) {
+      triplesValue = Number(value);
+      return triplesValue * 3;
+    }
+  }
+
   return 0;
 };
 

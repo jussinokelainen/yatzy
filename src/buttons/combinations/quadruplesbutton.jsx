@@ -15,7 +15,7 @@ const Sum = (props) => {
 
   let quadruplesValue = 0;
   for (const value in counts) {
-    if (counts[value] === 4) {
+    if (counts[value] >= 4) {
       quadruplesValue = Number(value);
       return quadruplesValue * 4;
     }
