@@ -77,6 +77,7 @@ const App = () => {
   function handleReset() {
     refreshValues(startValues)
     setLockState(startLockMap)
+    setDiceState(startValues)
     setRollCount(0)
     setRoundNum(roundNum + 1)
   }
