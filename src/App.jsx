@@ -4,7 +4,7 @@ import Button2 from './buttons/button2'
 import { useState } from 'react'
 import { saveScore, loadLb } from './dbfetch'
 import { Total, Scoreboard } from './scoreboard'
-import { resetTotal, resetSubTotal } from "./totals";
+import { resetTotal, resetSubTotal, perItemArray } from "./totals";
 import { values, startValues, startLockMap, diceImages } from './valuemaps'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 
@@ -26,7 +26,19 @@ const App = () => {
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
 
+  function startGame() {
+    perItemArray.fill(0)
+    setNameIsSet(true)
+    const hasKey = checkUserKey()
+    try {
+      hasKey ? console.log(`key exists: ${getUserKey()}`) : createUserKey()
+    } catch (e) {
+      console.log('Cannot access localStorage:', e);
+    }
+  }
+
   function restartGame() {
+    perItemArray.fill(0)
     setNameIsSet(false)
     setRoundNum(0)
     setShowLb(false)
@@ -36,6 +48,16 @@ const App = () => {
     setRollCount(0)
     resetTotal()
     resetSubTotal()
+  }
+
+  function endGame() {
+    let perfect = 1
+    if (perItemArray.includes(0)) {
+      perfect = 0
+    }
+    console.log(`pörri: ${perfect}`)
+    console.log(perItemArray)
+    saveScore(name, Number(Total()), getUserKey(), perfect)
   }
 
   function toggleLock(i) {
@@ -86,16 +108,6 @@ const App = () => {
     return 3 - rollCount
   }
 
-
-  function startGame() {
-    setNameIsSet(true)
-    const hasKey = checkUserKey()
-    try {
-      hasKey ? console.log(`key exists: ${getUserKey()}`) : createUserKey()
-    } catch (e) {
-      console.log('Cannot access localStorage:', e);
-    }
-  }
 
   function showLeaderBoard(type) {
     loadLb(setLbScores, type)
@@ -212,7 +224,7 @@ const App = () => {
   }
 
   // End of game screen
-  saveScore(name, Number(Total()), getUserKey())
+  endGame()
   return (
     <div>
       <table className="gameover-table">

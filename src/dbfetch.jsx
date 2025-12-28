@@ -1,14 +1,14 @@
 const DBPORT = 3000; // Node server port
 
 // Add score to the leaderboard
-export function saveScore(name, total, id) {
+export function saveScore(name, total, id, perfect) {
   console.log('Saving scores')
   const apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/save-score`;
   const totalNum = total;
   fetch(apiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, score: totalNum, id }),
+    body: JSON.stringify({ name, score: totalNum, id, perfect }),
   });
 }
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { updateSubTotal } from "../totals";
+import { updateSubTotal, perItemArray } from "../totals";
 
 function Numberbuttons(props) {
   const [buttonText, setButtonText] = useState(props.text);
@@ -12,6 +12,7 @@ function Numberbuttons(props) {
     const count = values.filter(value => value === targetNumber).length;
     const sum = props.target * count;
 
+    perItemArray[targetNumber - 1] = sum
     setButtonText(`${sum}`);
     setIsClicked(true);
     updateSubTotal(sum);
