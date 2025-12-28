@@ -20,7 +20,10 @@ app.post('/api/save-score', async (req, res) => {
 
 app.get('/api/load-scores', async (req, res) => {
   try {
-    const result = await showResults();
+    const { type } = req.query;
+
+    const result = await showResults(type);
+
     res.set('Cache-Control', 'no-store');
     res.json({ success: true, result });
   } catch (e) {

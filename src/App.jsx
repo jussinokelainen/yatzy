@@ -97,8 +97,14 @@ const App = () => {
     }
   }
 
-  function showLeaderBoard() {
-    loadLb(setLbScores)
+  function showLeaderBoardByName() {
+    showLeaderBoard('name')
+  }
+  function showLeaderBoardById() {
+    showLeaderBoard('id')
+  }
+  function showLeaderBoard(type) {
+    loadLb(setLbScores, type)
     setNameIsSet(true)
     setShowLb(true)
   }
@@ -131,7 +137,12 @@ const App = () => {
             </tr>
             <tr>
               <td className="gameover-table">
-                <Button handleClick={showLeaderBoard} text="Show leaderboard" className="gameover-buttons" />
+                <Button handleClick={showLeaderBoardByName} text="Show leaderboard by name" className="gameover-buttons" />
+              </td>
+            </tr>
+            <tr>
+              <td className="gameover-table">
+                <Button handleClick={showLeaderBoardById} text="Show leaderboard by id" className="gameover-buttons" />
               </td>
             </tr>
           </tbody>

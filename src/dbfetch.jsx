@@ -13,9 +13,9 @@ export function saveScore(name, total, id) {
 }
 
 // Load leaderboard
-export async function loadLb(setlb) {
+export async function loadLb(setlb, type) {
   console.log('Fetching leaderboard')
-  const apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/load-scores`;
+  const apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/load-scores?type=${type}`;
 
   try {
     const response = await fetch(apiUrl, {

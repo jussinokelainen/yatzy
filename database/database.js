@@ -32,9 +32,16 @@ export const addResult = (name, score, id) => {
   });
 };
 
-export const showResults = () => {
+export const showResults = (type) => {
+  let query = ""
+  if (type === 'name') {
+    query = "SELECT name, MAX(score) AS score FROM results GROUP BY name ORDER BY score DESC LIMIT 20;"
+  }
+  if (type === 'id') {
+    query = "SELECT MIN(name) AS name, MAX(score) AS score FROM results GROUP BY id ORDER BY score DESC;"
+  }
   return new Promise((resolve, reject) => {
-    pool.query("SELECT name, MAX(score) AS score FROM results GROUP BY name ORDER BY score DESC LIMIT 20;",
+    pool.query(query,
       (error, results) => {
         if (error) {
           return reject(error);
