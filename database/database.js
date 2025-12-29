@@ -39,7 +39,8 @@ export const showResults = (type) => {
   }
   if (type === 'id') {
     query = `SELECT mode() WITHIN GROUP (ORDER BY name) AS name, 
-             MAX(score) AS score
+             MAX(score) AS score,
+             COUNT(*)
              FROM results 
              GROUP BY id ORDER BY score DESC;`
 

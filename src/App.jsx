@@ -7,6 +7,8 @@ import { Total, Scoreboard } from './scoreboard'
 import { resetTotal, resetSubTotal, perItemArray } from "./totals";
 import { values, startValues, startLockMap, diceImages } from './valuemaps'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
+let showTotalGames = false
+let LBWIDTH = 3
 
 function refreshValues(newValues) {
   values.set(1, newValues.get(1));
@@ -108,6 +110,14 @@ const App = () => {
 
 
   function showLeaderBoard(type) {
+    if (type === 'id') {
+      showTotalGames = true
+      LBWIDTH = 4
+    } else {
+      showTotalGames = false
+      LBWIDTH = 3
+
+    }
     loadLb(setLbScores, type)
     setNameIsSet(true)
     setShowLb(true)
@@ -161,23 +171,40 @@ const App = () => {
         <table className="leaderboard-screen">
           <tbody>
             <tr>
-              <td className="leaderboard-screen">
+              <th colSpan={LBWIDTH} className="leaderboard-screen">
                 <p className="gameover-text">Leaderboard</p>
-              </td>
+              </th>
             </tr>
             <tr>
               <td className="leaderboard-table">
-                <ul>
-                  {lbScores.map((score, index) => (
-                    <li key={index}>
-                      {index + 1}. {score.name}: {score.score}
-                    </li>
-                  ))}
-                </ul>
+                <p>Place</p>
               </td>
+              <td className="leaderboard-table">
+                <p>Name</p>
+              </td>
+              <td className="leaderboard-table">
+                <p>Score</p>
+              </td>
+              {showTotalGames ?
+                <td className="leaderboard-table">
+                  <p>Games</p>
+                </td> : null
+              }
             </tr>
+            {lbScores.map((score, index) => (
+              <tr key={index}>
+                <td className="leaderboard-table">{index + 1}.</td>
+                <td className="leaderboard-table">{score.name}</td>
+                <td className="leaderboard-table">{score.score}</td>
+                {showTotalGames ?
+                  <td className="leaderboard-table">
+                    {score.count}
+                  </td> : null
+                }
+              </tr>
+            ))}
             <tr>
-              <td className="leaderboard-screen">
+              <td colSpan={LBWIDTH} className="leaderboard-screen">
                 <Button handleClick={restartGame} text='Back' className="gameover-buttons" />
               </td>
             </tr>
