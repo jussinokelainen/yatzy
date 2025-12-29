@@ -31,7 +31,7 @@ const App = () => {
     setNameIsSet(true)
     const hasKey = checkUserKey()
     try {
-      hasKey ? console.log(`key exists: ${getUserKey()}`) : createUserKey()
+      hasKey ? null : createUserKey()
     } catch (e) {
       console.log('Cannot access localStorage:', e);
     }
@@ -55,8 +55,6 @@ const App = () => {
     if (perItemArray.includes(0)) {
       perfect = 0
     }
-    console.log(`pörri: ${perfect}`)
-    console.log(perItemArray)
     saveScore(name, Number(Total()), getUserKey(), perfect)
   }
 
