@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+#
+# For this script to work, you have to be in the same
+# directory the script is in.
+# The script also partly enforces that by checking
+# that the directory the script is run in has the
+# correct name, but that obviously doesn't make it
+# impossible to run the script at locations where it
+# wasnt designed to be run
+
+DIR=${PWD##*/}
+RUN=false
+
+fatal() {
+	echo '[FATAL]' "$@" >&2
+	exit 1
+}
+
+show-help() {
+	cat <<-EOF
+	
+	 Backend server build script for this yatzy project.
+
+	 This script builds the server in backend/ and if
+	 given the 'r' option runs the server
+	
+
+	 Available commands:
+	   -h | Show help
+	   -r | [OPTIONAL] automatically runs the server
+	
+	EOF
+}
+
+main() {
+	if [[ $DIR != "yatzy" ]]; then
+		fatal 'wrong directory'
+	fi
+	local OPTARG OPTIND opt
+	while getopts 'hr' opt; do
+		case "$opt" in
+			r) RUN=true ;;
+			h)
+				show-help
+				exit 0
+				;;
+			*) fatal 'Bad option, use -h for help';;
+		esac
+	done
+
+	cd ./backend/
+	go build
+	cd ..
+
+	if [[ "$RUN" = true ]]; then
+		./backend/backend
+	else
+		echo run ./backend/backend to start the server
+	fi
+}
+
+main "$@"
