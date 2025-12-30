@@ -1,2 +1,2 @@
 # Yatzy web app
-    made with react and vite, using a postgres database
+    Made using react, vite and a RESTful api made with Go

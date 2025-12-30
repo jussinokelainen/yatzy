@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Script to start the backend
+# and frontend servers
+
+printf '\e[H\e[2J'
+./backend/backend &
+npm run dev

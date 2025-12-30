@@ -20,6 +20,7 @@ var (
 	user        = os.Getenv("USER")
 	password    = os.Getenv("PASSWORD")
 	dbname      = os.Getenv("DATABASE")
+	ip          = os.Getenv("IP")
 )
 
 // Struct for data in the database
@@ -52,8 +53,10 @@ func main() {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			"http://localhost:5173",
+			"http://" + ip + ":2222",
+			"http://" + ip + ":5173",
 			"http://localhost:2222",
+			"http://localhost:5173",
 		},
 		AllowMethods: []string{
 			"GET", "POST",
@@ -64,7 +67,7 @@ func main() {
 		ExposeHeaders: []string{
 			"Content-Length",
 		},
-		AllowCredentials: true, // only if you use cookies/auth
+		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
@@ -72,6 +75,6 @@ func main() {
 	router.GET("/GetStats", getStatsById)
 	router.POST("/AddScore", addScore)
 
-	fmt.Println("Server running...")
-	router.Run("localhost:3000")
+	fmt.Println("Backend Server running...")
+	router.Run("0.0.0.0:3000")
 }
