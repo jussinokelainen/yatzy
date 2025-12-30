@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
@@ -46,12 +48,30 @@ func main() {
 	db = openDatabase()
 	defer db.Close()
 
-	fmt.Println("Server running...")
-
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"http://localhost:2222",
+		},
+		AllowMethods: []string{
+			"GET", "POST",
+		},
+		AllowHeaders: []string{
+			"Origin", "Content-Type", "Authorization",
+		},
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
+		AllowCredentials: true, // only if you use cookies/auth
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router.GET("/GetScores", getTopScores)
 	router.GET("/GetStats", getStatsById)
 	router.POST("/AddScore", addScore)
 
+	fmt.Println("Server running...")
 	router.Run("localhost:3000")
 }

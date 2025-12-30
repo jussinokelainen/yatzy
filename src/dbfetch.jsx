@@ -1,4 +1,4 @@
-const DBPORT = 3000; // Node server port
+const DBPORT = 3000; // Go server port
 
 // Add score to the leaderboard
 export function saveScore(name, total, id, perfect) {
@@ -15,7 +15,13 @@ export function saveScore(name, total, id, perfect) {
 // Load leaderboard
 export async function loadLb(setlb, type) {
   console.log('Fetching leaderboard')
-  const apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/GetScores`;
+  let apiUrl = ``;
+  if (type === 'name') {
+    apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/GetScores`
+  }
+  if (type === 'id') {
+    apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/GetStats`
+  }
 
   try {
     const response = await fetch(apiUrl, {

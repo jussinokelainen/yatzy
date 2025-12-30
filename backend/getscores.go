@@ -36,7 +36,10 @@ func getStatsById(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	c.IndentedJSON(http.StatusOK, results)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"success": true,
+		"result":  results,
+	})
 }
 
 func getTopScores(c *gin.Context) {
@@ -61,5 +64,8 @@ func getTopScores(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	c.IndentedJSON(http.StatusOK, results)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"success": true,
+		"result":  results,
+	})
 }

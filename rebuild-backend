@@ -23,6 +23,8 @@ show-help() {
 
 	 This script builds the server in backend/ and if
 	 given the 'r' option runs the server
+	 The script clears the screen, but it keeps scrollback,
+	 so you can still see what was previously on the screen
 	
 
 	 Available commands:
@@ -51,6 +53,7 @@ main() {
 	cd ./backend/
 	go build
 	cd ..
+	printf '\e[H\e[2J'
 
 	if [[ "$RUN" = true ]]; then
 		./backend/backend

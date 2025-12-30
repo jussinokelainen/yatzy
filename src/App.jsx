@@ -29,7 +29,6 @@ const App = () => {
   const [rollCount, setRollCount] = useState(0);
 
   function startGame() {
-    perItemArray.fill(0)
     setNameIsSet(true)
     const hasKey = checkUserKey()
     try {
@@ -53,9 +52,9 @@ const App = () => {
   }
 
   function endGame() {
-    let perfect = 1
+    let perfect = true
     if (perItemArray.includes(0)) {
-      perfect = 0
+      perfect = false
     }
     saveScore(name, Number(Total()), getUserKey(), perfect)
   }
