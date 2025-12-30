@@ -15,8 +15,8 @@ func addScore(c *gin.Context) {
 		return
 	}
 
-	sqlStatement := `INSERT INTO results(name, score, id, perfect) VALUES($1, $2, $3, $4);`
-	_, err = db.Exec(sqlStatement, req.Name, req.Score, req.Id, req.Perfect)
+	sqlStatement := `INSERT INTO results(name, score, id, row) VALUES($1, $2, $3, $4);`
+	_, err = db.Exec(sqlStatement, req.Name, req.Score, req.Id, req.Row)
 	if err != nil {
 		c.IndentedJSON(500, gin.H{"error": "failed to add score"})
 		panic(err)

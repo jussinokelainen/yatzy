@@ -9,7 +9,6 @@
 # wasnt designed to be run
 
 DIR=${PWD##*/}
-RUN=false
 
 fatal() {
 	echo '[FATAL]' "$@" >&2
@@ -21,15 +20,14 @@ show-help() {
 	
 	 Backend server build script for this yatzy project.
 
-	 This script builds the server in backend/ and if
-	 given the 'r' option runs the server
+	 This script builds the server in backend/
+
 	 The script clears the screen, but it keeps scrollback,
 	 so you can still see what was previously on the screen
 	
 
 	 Available commands:
 	   -h | Show help
-	   -r | [OPTIONAL] automatically runs the servers
 	
 	EOF
 }
@@ -41,7 +39,6 @@ main() {
 	local OPTARG OPTIND opt
 	while getopts 'hr' opt; do
 		case "$opt" in
-			r) RUN=true ;;
 			h)
 				show-help
 				exit 0
@@ -57,13 +54,6 @@ main() {
 	printf "\r\e[0K" # clear the line
 	printf "\e[32mBuilding done\e[0m\n"
 	sleep .2
-
-	printf '\e[H\e[2J'
-
-
-	if [[ "$RUN" = true ]]; then
-		./start-servers
-	fi
 }
 
 main "$@"

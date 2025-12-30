@@ -52,11 +52,8 @@ const App = () => {
   }
 
   function endGame() {
-    let perfect = true
-    if (perItemArray.includes(0)) {
-      perfect = false
-    }
-    saveScore(name, Number(Total()), getUserKey(), perfect)
+    const row = perItemArray.join(';')
+    saveScore(name, Number(Total()), getUserKey(), row)
   }
 
   function toggleLock(i) {
