@@ -45,7 +45,7 @@ func getStatsById(c *gin.Context) {
 func getTopScores(c *gin.Context) {
 	results := []UserDataStruct{}
 
-	sqlStatement := `SELECT * FROM results ORDER BY score DESC LIMIT 20;`
+	sqlStatement := `SELECT name, score FROM results ORDER BY score DESC LIMIT 20;`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		panic(err)
@@ -53,7 +53,7 @@ func getTopScores(c *gin.Context) {
 	defer rows.Close()
 	for rows.Next() {
 		var row UserDataStruct
-		err = rows.Scan(&row.Name, &row.Score, &row.Id, &row.Perfect)
+		err = rows.Scan(&row.Name, &row.Score)
 		if err != nil {
 			panic(err)
 		}

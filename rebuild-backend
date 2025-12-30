@@ -29,7 +29,7 @@ show-help() {
 
 	 Available commands:
 	   -h | Show help
-	   -r | [OPTIONAL] automatically runs the server
+	   -r | [OPTIONAL] automatically runs the servers
 	
 	EOF
 }
@@ -50,15 +50,19 @@ main() {
 		esac
 	done
 
+	printf "\e[31mBuilding...\e[0m"
 	cd ./backend/
 	go build
 	cd ..
+	printf "\r\e[0K" # clear the line
+	printf "\e[32mBuilding done\e[0m\n"
+	sleep .2
+
 	printf '\e[H\e[2J'
 
+
 	if [[ "$RUN" = true ]]; then
-		./backend/backend
-	else
-		echo run ./backend/backend to start the server
+		./start-servers
 	fi
 }
 
