@@ -12,17 +12,14 @@ dist
 dist-ssr
 *.local
 
-backend/backend
+# Binaries
+server/server
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
 *.ntvs*
-*.njsproj
-*.sln
 *.sw?
 
 .env

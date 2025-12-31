@@ -18,13 +18,8 @@ fatal() {
 show-help() {
 	cat <<-EOF
 	
-	 Backend server build script for this yatzy project.
-
-	 This script builds the server in backend/
-
-	 The script clears the screen, but it keeps scrollback,
-	 so you can still see what was previously on the screen
-	
+	 This is a script to rebuild the yatzy web app
+	 and the server to serve the app
 
 	 Available commands:
 	   -h | Show help
@@ -37,7 +32,7 @@ main() {
 		fatal 'wrong directory'
 	fi
 	local OPTARG OPTIND opt
-	while getopts 'hr' opt; do
+	while getopts 'h' opt; do
 		case "$opt" in
 			h)
 				show-help
@@ -47,13 +42,19 @@ main() {
 		esac
 	done
 
-	printf "\e[31mBuilding...\e[0m"
-	cd ./backend/
+	printf "\e[31mBuilding server...\e[0m"
+	cd ./server/
 	go build
 	cd ..
 	printf "\r\e[0K" # clear the line
-	printf "\e[32mBuilding done\e[0m\n"
-	sleep .2
+	printf "\e[32mBuilding server done\e[0m\n"
+
+	printf "\e[31mCompiling website...\e[0m"
+	cd ./web/
+	npm run build >/dev/null
+	cd ..
+	printf "\r\e[0K" # clear the line
+	printf "\e[32mCompiling website done\e[0m\n"
 }
 
 main "$@"

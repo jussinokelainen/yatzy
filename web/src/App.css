@@ -1,5 +1,5 @@
 body {
-    background-image: url('./images/background.jpg');
+    background-image: url('/images/background.jpg');
     background-attachment: fixed;
     display: flex;
     justify-content: center;
@@ -208,154 +208,154 @@ td img {
 }
 
 .dice0 {
-    background-image: url('./images/dice0.png');
+    background-image: url('/images/dice0.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice1{
-    background-image: url('./images/dice1.png');
+    background-image: url('/images/dice1.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice2{
-    background-image: url('./images/dice2.png');
+    background-image: url('/images/dice2.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice3{
-    background-image: url('./images/dice3.png');
+    background-image: url('/images/dice3.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice4{
-    background-image: url('./images/dice4.png');
+    background-image: url('/images/dice4.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice5{
-    background-image: url('./images/dice5.png');
+    background-image: url('/images/dice5.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dice6{
-    background-image: url('./images/dice6.png');
+    background-image: url('/images/dice6.png');
     height: 50px;
     width: 50px;
     background-size: cover;
 }
 
 .dices1{
-    background-image: url('./images/dice11.png');
+    background-image: url('/images/dice11.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .dices2{
-    background-image: url('./images/dice22.png');
+    background-image: url('/images/dice22.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .dices3{
-    background-image: url('./images/dice33.png');
+    background-image: url('/images/dice33.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .dices4{
-    background-image: url('./images/dice44.png');
+    background-image: url('/images/dice44.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .dices5{
-    background-image: url('./images/dice55.png');
+    background-image: url('/images/dice55.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .dices6{
-    background-image: url('./images/dice66.png');
+    background-image: url('/images/dice66.png');
     height: 30px;
     width: 150px;
     background-size: cover;
 }
 
 .pair {
-    background-image: url('./images/pair.png');
+    background-image: url('/images/pair.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .doublepair {
-    background-image: url('./images/doublepair.png');
+    background-image: url('/images/doublepair.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .triples {
-    background-image: url('./images/triples.png');
+    background-image: url('/images/triples.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .quadruples {
-    background-image: url('./images/quadruples.png');
+    background-image: url('/images/quadruples.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .smallstraight {
-    background-image: url('./images/smallstraight.png');
+    background-image: url('/images/smallstraight.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .bigstraight {
-    background-image: url('./images/bigstraight.png');
+    background-image: url('/images/bigstraight.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .fullhouse {
-    background-image: url('./images/fullhouse.png');
+    background-image: url('/images/fullhouse.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .sattuma {
-    background-image: url('./images/sattuma.png');
+    background-image: url('/images/sattuma.png');
     background-size: cover;
     height: 30px;
     width: 150px; 
 }
 
 .jatsi {
-    background-image: url('./images/jatsi.png');
+    background-image: url('/images/jatsi.png');
     background-size: cover;
     height: 30px;
     width: 150px;
@@ -365,7 +365,7 @@ td img {
     position: absolute;
     display: flex;
     align-items: center;
-    background-image: url('./images/locked.png');
+    background-image: url('/images/locked.png');
     background-size: cover;
     height: 40px;
     width: 40px;

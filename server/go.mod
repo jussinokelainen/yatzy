@@ -1,9 +1,10 @@
-module yatzy/backend
+module yatzy/server
 
 go 1.25.5
 
 require (
 	github.com/gin-contrib/cors v1.7.6
+	github.com/gin-contrib/static v1.1.5
 	github.com/gin-gonic/gin v1.11.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9

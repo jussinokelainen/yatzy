@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
@@ -71,10 +72,15 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router.GET("/GetScores", getTopScores)
-	router.GET("/GetStats", getStatsById)
-	router.POST("/AddScore", addScore)
+	api := router.Group("/api")
+	{
+		api.GET("/getscores", getTopScores)
+		api.GET("/getstats", getStatsById)
+		api.POST("/addscore", addScore)
+	}
 
-	fmt.Println("Server running...")
+	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
+
+	fmt.Println("Db-api running...")
 	router.Run("0.0.0.0:3000")
 }
