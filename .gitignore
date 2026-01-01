@@ -16,10 +16,7 @@ dist-ssr
 server/server
 
 # Editor directories and files
-.idea
 .DS_Store
-*.suo
-*.ntvs*
-*.sw?
+TODO.md
 
 .env

@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { updateTotal, perItemArray, perItemIndex } from "../../totals";
+import { updateTotal, perItemIndex } from "../../totals";
+import { getUserKey } from '../../userkeys'
+import { makePOSTrequest } from "../../App";
 
 const Sum = (props) => {
   const values = props.values
@@ -31,7 +33,11 @@ const Triplesbutton = (props) => {
 
   const handleClick = () => {
     const sum = Sum({ values });
-    perItemArray[perItemIndex.triples] = sum
+    makePOSTrequest('updatescores', {
+      id: getUserKey(),
+      target: perItemIndex.triples,
+      value: sum
+    })
     setButtonText(`${sum}`);
     setIsClicked(true);
     updateTotal(sum);

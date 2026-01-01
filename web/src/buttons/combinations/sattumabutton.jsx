@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { updateTotal, perItemArray, perItemIndex } from "../../totals";
+import { updateTotal, perItemIndex } from "../../totals";
+import { getUserKey } from '../../userkeys'
+import { makePOSTrequest } from "../../App";
 
 const Sum = (props) => {
   const dicesum = props.values[0] + props.values[1] + props.values[2] + props.values[3] + props.values[4]
@@ -16,7 +18,11 @@ const Sattumabutton1 = (props) => {
 
   const handleClick = () => {
     const sum = Sum({ values });
-    perItemArray[perItemIndex.mixed] = sum
+    makePOSTrequest('updatescores', {
+      id: getUserKey(),
+      target: perItemIndex.mixed,
+      value: sum
+    })
     setButtonText(`${sum}`);
     setIsClicked(true);
     updateTotal(sum);

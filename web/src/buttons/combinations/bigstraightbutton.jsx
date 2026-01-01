@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { updateTotal, perItemArray, perItemIndex } from "../../totals";
+import { makePOSTrequest } from "../../App";
+import { updateTotal, perItemIndex } from "../../totals";
+import { getUserKey } from '../../userkeys'
 
 const Sum = (props) => {
   const values = props.values
@@ -18,7 +20,11 @@ const Bigstraightbutton1 = (props) => {
 
   const handleClick = () => {
     const sum = Sum({ values });
-    perItemArray[perItemIndex.bigstraight] = sum
+    makePOSTrequest('updatescores', {
+      id: getUserKey(),
+      target: perItemIndex.bigstraight,
+      value: sum
+    })
     setButtonText(`${sum}`);
     setIsClicked(true);
     updateTotal(sum);

@@ -1,26 +1,14 @@
-const DBPORT = 3000; // Go server port
-
-// Add score to the leaderboard
-export function saveScore(name, total, id, row) {
-  console.log('Saving scores')
-  const apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/addscore`;
-  const totalNum = total;
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, score: totalNum, id, row }),
-  });
-}
+export const PORT = 2222; // Go server port
 
 // Load leaderboard
 export async function loadLb(setlb, type) {
   console.log('Fetching leaderboard')
   let apiUrl = ``;
   if (type === 'name') {
-    apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/getscores`
+    apiUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/api/getscores`
   }
   if (type === 'id') {
-    apiUrl = `${window.location.protocol}//${window.location.hostname}:${DBPORT}/api/getstats`
+    apiUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/api/getstats`
   }
 
   try {

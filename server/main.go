@@ -16,12 +16,12 @@ import (
 
 var db *sql.DB
 var (
-	host        = os.Getenv("HOST")
-	port, error = strconv.Atoi(os.Getenv("PORT"))
-	user        = os.Getenv("USER")
-	password    = os.Getenv("PASSWORD")
-	dbname      = os.Getenv("DATABASE")
-	ip          = os.Getenv("IP")
+	host     = os.Getenv("HOST")
+	port, _  = strconv.Atoi(os.Getenv("PORT"))
+	user     = os.Getenv("USER")
+	password = os.Getenv("PASSWORD")
+	dbname   = os.Getenv("DATABASE")
+	ip       = os.Getenv("IP")
 )
 
 // Struct for data in the database
@@ -73,11 +73,14 @@ func main() {
 	{
 		api.GET("/getscores", getTopScores)
 		api.GET("/getstats", getStatsById)
-		api.POST("/addscore", addScore)
 	}
+	router.POST("/start", startGame)
+	router.POST("/end", endGame)
+	router.POST("/restart", restartGame)
+	router.POST("/updatescores", UpdateScores)
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
 
-	fmt.Println("Db-api running...")
+	fmt.Println("Server running...")
 	router.Run("0.0.0.0:2222")
 }

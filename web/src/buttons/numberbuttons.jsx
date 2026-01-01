@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { updateSubTotal, perItemArray } from "../totals";
+import { updateSubTotal } from "../totals";
+import { getUserKey } from '../userkeys'
+import { makePOSTrequest } from '../App'
 
 function Numberbuttons(props) {
   const [buttonText, setButtonText] = useState(props.text);
@@ -12,7 +14,11 @@ function Numberbuttons(props) {
     const count = values.filter(value => value === targetNumber).length;
     const sum = props.target * count;
 
-    perItemArray[targetNumber - 1] = sum
+    makePOSTrequest('updatescores', {
+      id: getUserKey(),
+      target: targetNumber - 1,
+      value: sum
+    })
     setButtonText(`${sum}`);
     setIsClicked(true);
     updateSubTotal(sum);

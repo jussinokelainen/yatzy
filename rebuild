@@ -9,6 +9,7 @@
 # wasnt designed to be run
 
 DIR=${PWD##*/}
+SERVER_ONLY=false
 
 fatal() {
 	echo '[FATAL]' "$@" >&2
@@ -22,6 +23,7 @@ show-help() {
 	 and the server to serve the app
 
 	 Available commands:
+	   -s | Only rebuild the server
 	   -h | Show help
 	
 	EOF
@@ -32,8 +34,9 @@ main() {
 		fatal 'wrong directory'
 	fi
 	local OPTARG OPTIND opt
-	while getopts 'h' opt; do
+	while getopts 'hs' opt; do
 		case "$opt" in
+			s) SERVER_ONLY=true;;
 			h)
 				show-help
 				exit 0
@@ -49,12 +52,14 @@ main() {
 	printf "\r\e[0K" # clear the line
 	printf "\e[32mBuilding server done\e[0m\n"
 
-	printf "\e[31mCompiling website...\e[0m"
-	cd ./web/
-	npm run build >/dev/null
-	cd ..
-	printf "\r\e[0K" # clear the line
-	printf "\e[32mCompiling website done\e[0m\n"
+	if [[ $SERVER_ONLY = false ]]; then
+		printf "\e[31mCompiling website...\e[0m"
+		cd ./web/
+		npm run build >/dev/null
+		cd ..
+		printf "\r\e[0K" # clear the line
+		printf "\e[32mCompiling website done\e[0m\n"
+	fi
 }
 
 main "$@"
