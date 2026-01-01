@@ -54,9 +54,6 @@ func main() {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			"http://" + ip + ":2222",
-			"http://" + ip + ":5173",
-			"http://localhost:2222",
 			"http://localhost:5173",
 		},
 		AllowMethods: []string{
@@ -82,5 +79,5 @@ func main() {
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
 
 	fmt.Println("Db-api running...")
-	router.Run("0.0.0.0:3000")
+	router.Run("0.0.0.0:2222")
 }
