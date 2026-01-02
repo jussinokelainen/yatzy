@@ -48,9 +48,12 @@ func calculateTotal(id string) int {
 	for i := range 6 {
 		total += scoreRow[i]
 	}
+
+	// Check if bonus is given
 	if total >= 63 {
 		total += 50
 	}
+
 	for i := 6; i < 15; i++ {
 		total += scoreRow[i]
 	}

@@ -1,3 +1,4 @@
+// Subtotal stuff
 let subTotal = 0;
 
 export function updateSubTotal(value) {
@@ -11,6 +12,7 @@ export function resetSubTotal() {
 export { subTotal }
 
 
+// Total stuff
 let total = 0;
 
 export function updateTotal(value) {
@@ -23,6 +25,7 @@ export function resetTotal() {
 
 export { total }
 
+// Array indexes for server side score array
 export const perItemIndex = {
   one: 0,
   two: 1,
