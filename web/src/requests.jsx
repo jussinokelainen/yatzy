@@ -5,18 +5,13 @@ export async function loadLb(setlb, type) {
   console.log('Fetching leaderboard')
   let apiUrl = ``;
   if (type === 'name') {
-    apiUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/api/getscores`
+    apiUrl = `api/getscores`
   }
   if (type === 'id') {
-    apiUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/api/getstats`
+    apiUrl = `api/getstats`
   }
-
   try {
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
+    const response = await makeGETrequest(apiUrl)
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
@@ -42,11 +37,13 @@ export function makePOSTrequest(url, body) {
   });
 }
 
-// export async function makeGETrequest(url, body) {
-//   const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
-//   const response = await fetch(fullUrl, {
-//     method: 'GET',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify(body),
-//   });
-// }
+export async function makeGETrequest(url, body) {
+  const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
+  const response = await fetch(fullUrl, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  return response
+}
