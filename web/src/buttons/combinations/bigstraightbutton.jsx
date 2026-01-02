@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { makePOSTrequest } from "../../App";
+import { makePOSTrequest } from "../../requests";
 import { updateTotal, perItemIndex } from "../../totals";
 import { getUserKey } from '../../userkeys'
 

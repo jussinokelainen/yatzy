@@ -2,22 +2,13 @@ import './App.css'
 import Button from './buttons/button'
 import Button2 from './buttons/button2'
 import { useState } from 'react'
-import { loadLb, PORT } from './dbfetch'
+import { loadLb, makePOSTrequest } from './requests'
 import { Total, Scoreboard } from './scoreboard'
 import { resetTotal, resetSubTotal } from "./totals";
 import { values, startValues, startLockMap, diceImages } from './valuemaps'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
-
-export function makePOSTrequest(url, body) {
-  const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
-  fetch(fullUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-}
 
 function refreshValues(newValues) {
   values.set(1, newValues.get(1));

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { updateSubTotal } from "../totals";
 import { getUserKey } from '../userkeys'
-import { makePOSTrequest } from '../App'
+import { makePOSTrequest } from '../requests'
 
 function Numberbuttons(props) {
   const [buttonText, setButtonText] = useState(props.text);

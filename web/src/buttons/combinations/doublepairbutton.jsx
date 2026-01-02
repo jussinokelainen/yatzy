@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { updateTotal, perItemIndex } from "../../totals";
 import { getUserKey } from '../../userkeys'
-import { makePOSTrequest } from "../../App";
+import { makePOSTrequest } from "../../requests";
 
 const Sum = (props) => {
   const values = props.values

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { updateTotal, perItemIndex } from "../../totals";
 import { getUserKey } from '../../userkeys'
-import { makePOSTrequest } from "../../App";
+import { makePOSTrequest } from "../../requests";
 
 const Sum = (props) => {
   const dicesum = props.values[0] + props.values[1] + props.values[2] + props.values[3] + props.values[4]
