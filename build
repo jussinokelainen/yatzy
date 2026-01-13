@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+#
+# For this script to work, you have to be in the same
+# directory the script is in.
+# The script also partly enforces that by checking
+# that the directory the script is run in has the
+# correct name, but that obviously doesn't make it
+# impossible to run the script in ways it wasnt designed
+
+DIR=${PWD##*/}
+SERVER_ONLY=false
+START_SERVERS=false
+
+fatal() {
+	echo '[FATAL]' "$@" >&2
+	exit 1
+}
+
+show-help() {
+	cat <<-EOF
+	
+	 This is a script to rebuild the yatzy web app
+	 and the server to serve the app
+
+	 Available commands:
+	   -s | Start the servers after rebuilding
+	   -b | Only rebuild the server
+	   -h | Show help
+	
+	EOF
+}
+
+build-server() {
+	printf "\e[31mBuilding server...\e[0m"
+
+	cd ./server/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server
+	cd ..
+
+	printf "\r\e[0K"
+	printf "\e[32mBuilding server done\e[0m\n"
+}
+
+build-web() {
+	printf "\e[31mCompiling website...\e[0m"
+
+	cd ./web/
+	npm run build >/dev/null
+	cd ..
+
+	printf "\r\e[0K"
+	printf "\e[32mCompiling website done\e[0m\n"
+}
+
+main() {
+	if [[ $DIR != "yatzy" ]]; then
+		fatal 'wrong directory'
+	fi
+	local OPTARG OPTIND opt
+	while getopts 'hsb' opt; do
+		case "$opt" in
+			s) START_SERVERS=true;;
+			b) SERVER_ONLY=true;;
+			h)
+				show-help
+				exit 0
+				;;
+			*) fatal 'Bad option, use -h for help';;
+		esac
+	done
+
+	build-server
+	if [[ $SERVER_ONLY = false ]]; then
+		build-web
+	fi
+
+	# Start the servers after rebuilding if opted
+	# Else the command has to be run manually with --build
+	# after to use newest build
+	if [[ $START_SERVERS = true ]]; then
+		printf "\e[31mStarting server...\e[0m"
+
+		docker compose up --build
+	fi
+}
+
+main "$@"

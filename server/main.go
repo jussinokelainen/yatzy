@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -16,12 +15,10 @@ import (
 
 var db *sql.DB
 var (
-	host     = os.Getenv("HOST")
-	port, _  = strconv.Atoi(os.Getenv("PORT"))
-	user     = os.Getenv("USER")
-	password = os.Getenv("PASSWORD")
-	dbname   = os.Getenv("DATABASE")
-	ip       = os.Getenv("IP")
+	port     = 5432
+	user     = os.Getenv("DATABASE_USER")
+	password = os.Getenv("DATABASE_PASSWORD")
+	dbname   = os.Getenv("DATABASE_NAME")
 )
 
 // Struct for data in the database
@@ -34,9 +31,9 @@ type UserDataStruct struct {
 
 // Function to open a connection to the database
 func openDatabase() *sql.DB {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	psqlInfo := fmt.Sprintf("host=db port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
