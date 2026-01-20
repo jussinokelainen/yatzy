@@ -6,11 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type startGameRequest struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
 func getReq(c *gin.Context) (startGameRequest, error) {
 	var req startGameRequest
 

@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 #
-# For this script to work, you have to be in the same
-# directory the script is in.
-# The script also partly enforces that by checking
-# that the directory the script is run in has the
-# correct name, but that obviously doesn't make it
-# impossible to run the script in ways it wasnt designed
+# For this script to work as intended, working directory should
+# should be the directory the script is in.
 
-DIR=${PWD##*/}
+WORKING_DIR=${PWD##*/}
+SCRIPT_DIR=$(basename "$(cd "$(dirname "$0")" && pwd)")
 SERVER_ONLY=false
 START_SERVERS=false
 
@@ -19,41 +16,57 @@ fatal() {
 show-help() {
 	cat <<-EOF
 	
-	 This is a script to rebuild the yatzy web app
-	 and the server to serve the app
+	 This is a script to build the yatzy web app
+	 and the server
 
 	 Available commands:
 	   -s | Start the servers after rebuilding
-	   -b | Only rebuild the server
+	   -b | Only build the server
 	   -h | Show help
 	
 	EOF
 }
 
 build-server() {
-	printf "\e[31mBuilding server...\e[0m"
+	local output
+	printf "\e[31mCompiling server...\e[0m"
 
 	cd ./server/
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server
+	output=$(CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server 2>&1)
+	if [[ $? = 0 ]]; then
+		printf "\r\e[0K"
+		printf "[\e[32m OK \e[0m] Compiling server done\n"
+	else
+		printf "\r\e[0K"
+		printf "[\e[31m ERROR \e[0m] Compiling server failed!\n"
+		sleep .2
+		echo "$output"
+		exit 1
+	fi
 	cd ..
-
-	printf "\r\e[0K"
-	printf "\e[32mBuilding server done\e[0m\n"
 }
 
 build-web() {
+	local output
 	printf "\e[31mCompiling website...\e[0m"
 
 	cd ./web/
-	npm run build >/dev/null
+	output=$(npm run build 2>&1)
+	if [[ $? = 0 ]]; then
+		printf "\r\e[0K"
+		printf "[\e[32m OK \e[0m] Compiling website done\n"
+	else
+		printf "\r\e[0K"
+		printf "[\e[31m ERROR \e[0m] Compiling website failed!\n"
+		sleep .2
+		echo "$output"
+		exit 1
+	fi
 	cd ..
-
-	printf "\r\e[0K"
-	printf "\e[32mCompiling website done\e[0m\n"
 }
 
 main() {
-	if [[ $DIR != "yatzy" ]]; then
+	if [[ $WORKING_DIR != $SCRIPT_DIR ]]; then
 		fatal 'wrong directory'
 	fi
 	local OPTARG OPTIND opt
@@ -74,12 +87,14 @@ main() {
 		build-web
 	fi
 
-	# Start the servers after rebuilding if opted
-	# Else the command has to be run manually with --build
-	# after to use newest build
+	sleep .5
 	if [[ $START_SERVERS = true ]]; then
-		printf "\e[31mStarting server...\e[0m"
+		printf "[\e[35m INFO \e[0m] Checking for existing server...\n"
+		docker compose down
 
+		sleep .2
+		printf "[\e[35m INFO \e[0m] Starting server...\n"
+		sleep .5
 		docker compose up --build
 	fi
 }

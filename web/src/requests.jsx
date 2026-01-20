@@ -37,12 +37,11 @@ export function makePOSTrequest(url, body) {
   });
 }
 
-export async function makeGETrequest(url, body) {
+export async function makeGETrequest(url) {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
   const response = await fetch(fullUrl, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
   });
 
   return response
