@@ -68,6 +68,7 @@ func main() {
 		api.GET("/getscores", getTopScores)
 		api.GET("/getstats", getStatsById)
 	}
+
 	router.POST("/start", startGame)
 	router.POST("/end", endGame)
 	router.POST("/restart", restartGame)
@@ -75,6 +76,7 @@ func main() {
 	router.POST("/selectItem/:what", itemSelector)
 
 	router.GET("/rollDice/:id", rollDice)
+	router.GET("/getScoresByID/:id", sendScoresByID)
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
 

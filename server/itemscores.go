@@ -145,8 +145,8 @@ func calculateMixed(id string) int {
 func calculateQuintuples(id string) int {
 	freqMap := getFrequencyMap(getDiceValuesArray(id))
 	sum := 0
-	for _, c := range freqMap {
-		if c >= 5 {
+	for i, c := range freqMap {
+		if c >= 5 && i != 0 {
 			sum = 50
 			info("yatzy found!")
 		}

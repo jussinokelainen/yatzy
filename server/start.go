@@ -34,7 +34,7 @@ func endGame(c *gin.Context) {
 		return
 	}
 
-	total := calculateTotal(req.Id)
+	total, _ := calculateTotal(req.Id)
 	row := getScoreRow(req.Id)
 	err = addScore(req.Name, total, req.Id, row)
 	if err != nil {

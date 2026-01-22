@@ -6,6 +6,7 @@
 WORKING_DIR=${PWD##*/}
 SCRIPT_DIR=$(basename "$(cd "$(dirname "$0")" && pwd)")
 SERVER_ONLY=false
+WEB_ONLY=false
 START_SERVERS=false
 
 fatal() {
@@ -70,9 +71,10 @@ main() {
 		fatal 'wrong directory'
 	fi
 	local OPTARG OPTIND opt
-	while getopts 'hsb' opt; do
+	while getopts 'whsb' opt; do
 		case "$opt" in
 			s) START_SERVERS=true;;
+			w) WEB_ONLY=true;;
 			b) SERVER_ONLY=true;;
 			h)
 				show-help
@@ -82,7 +84,9 @@ main() {
 		esac
 	done
 
-	build-server
+	if [[ $WEB_ONLY = false ]]; then
+		build-server
+	fi
 	if [[ $SERVER_ONLY = false ]]; then
 		build-web
 	fi

@@ -3,11 +3,12 @@ import Button from './buttons/button'
 import Button2 from './buttons/button2'
 import { useState } from 'react'
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
-import { Total, Scoreboard } from './scoreboard'
-import { resetTotal, resetSubTotal } from "./totals";
+import { Scoreboard } from './scoreboard'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
+
+// TODO: Get totals to work visually
 
 const diceImages = new Map([
   [0, 'dice0'],
@@ -49,8 +50,6 @@ const App = () => {
     setRoundNum(0)
     setShowLb(false)
     setRollCount(0)
-    resetTotal()
-    resetSubTotal()
   }
 
   function endGame() {
@@ -264,7 +263,7 @@ const App = () => {
           </tr>
           <tr>
             <td className="gameover-table">
-              <p className="gameover-text">Final score: <Total /></p>
+              <p className="gameover-text">Final score: 0</p>
             </td>
           </tr>
           <tr>
