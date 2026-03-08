@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# For this script to work as intended, working directory should
-# should be the directory the script is in.
+# TODO: Switch this script for a Makefile
 
 WORKING_DIR=${PWD##*/}
 SCRIPT_DIR=$(basename "$(cd "$(dirname "$0")" && pwd)")
@@ -16,15 +15,16 @@ fatal() {
 
 show-help() {
 	cat <<-EOF
-	
-	 This is a script to build the yatzy web app
-	 and the server
 
-	 Available commands:
-	   -s | Start the servers after rebuilding
-	   -b | Only build the server
-	   -h | Show help
-	
+		 This is a script to build the yatzy web app
+		 and the server
+
+		 Available commands:
+		   -s | Start the servers after rebuilding
+		   -w | Only build the web side
+		   -b | Only build the server
+		   -h | Show help
+
 	EOF
 }
 
@@ -73,14 +73,14 @@ main() {
 	local OPTARG OPTIND opt
 	while getopts 'whsb' opt; do
 		case "$opt" in
-			s) START_SERVERS=true;;
-			w) WEB_ONLY=true;;
-			b) SERVER_ONLY=true;;
-			h)
-				show-help
-				exit 0
-				;;
-			*) fatal 'Bad option, use -h for help';;
+		s) START_SERVERS=true ;;
+		w) WEB_ONLY=true ;;
+		b) SERVER_ONLY=true ;;
+		h)
+			show-help
+			exit 0
+			;;
+		*) fatal 'Bad option, use -h for help' ;;
 		esac
 	done
 
