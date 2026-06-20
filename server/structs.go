@@ -8,9 +8,11 @@ type UserDataStruct struct {
 }
 
 type GameData struct {
-	name       string
-	scorearray [15]int
-	diceArray  [5]DiceData
+	name         string
+	scorearray   [15]int
+	clickedarray [15]bool
+	diceArray    [5]DiceData
+	turnCount    int
 }
 
 type DiceData struct {

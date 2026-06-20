@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,9 +14,14 @@ var UserMap = map[string]*GameData{}
 func InitUser(id string, name string) {
 	var newUser GameData
 	newUser.name = name
+	newUser.turnCount = 0
 	for i := range newUser.diceArray {
 		newUser.diceArray[i].value = 0
 		newUser.diceArray[i].locked = false
+	}
+
+	for i := range newUser.clickedarray {
+		newUser.clickedarray[i] = false
 	}
 
 	UserMap[id] = &newUser
@@ -111,6 +117,10 @@ func itemSelector(c *gin.Context) {
 	}
 
 	UserMap[req.Id].scorearray[whatInt] = val
+	UserMap[req.Id].clickedarray[whatInt] = true
+	UserMap[req.Id].turnCount += 1
+	info(fmt.Sprint(UserMap[req.Id].clickedarray))
+	info(fmt.Sprint(UserMap[req.Id].turnCount))
 	resetDice(req.Id)
 }
 
