@@ -3,12 +3,11 @@ import Button from './buttons/button'
 import Button2 from './buttons/button2'
 import { useState } from 'react'
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
-import { Scoreboard } from './scoreboard'
+import { Scoreboard, getScores } from './scoreboard'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
 
-// TODO: Get totals to work visually
 
 const diceImages = new Map([
   [0, 'dice0'],
@@ -29,6 +28,7 @@ const App = () => {
   const [showLb, setShowLb] = useState(false);
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
+  const [total, setTotal] = useState(0)
 
   function startGame() {
     const hasKey = checkUserKey()
@@ -50,10 +50,12 @@ const App = () => {
     setRoundNum(0)
     setShowLb(false)
     setRollCount(0)
+    setTotal(0)
   }
 
-  function endGame() {
-    makePOSTrequest('end', { id: getUserKey(), name })
+  async function endGame() {
+    const data = await getScores(id)
+    setTotal(data.total)
   }
 
   function toggleLock(i) {
@@ -251,7 +253,7 @@ const App = () => {
   }
 
   // End of game screen
-  endGame()
+  endGame();
   return (
     <div>
       <table className="gameover-table">
@@ -263,7 +265,7 @@ const App = () => {
           </tr>
           <tr>
             <td className="gameover-table">
-              <p className="gameover-text">Final score: 0</p>
+              <p className="gameover-text">Final score: {total}</p>
             </td>
           </tr>
           <tr>

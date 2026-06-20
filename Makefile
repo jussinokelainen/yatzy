@@ -9,7 +9,7 @@ restart: build
 	@sleep .2
 	@printf "[\e[35m INFO \e[0m] Starting server...\n"
 	@sleep .5
-	@docker compose up --build
+	@docker compose up --build --detach
 
 server:
 	@printf "\e[31mCompiling server...\e[0m\n"

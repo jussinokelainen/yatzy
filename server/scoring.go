@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -113,7 +112,6 @@ func itemSelector(c *gin.Context) {
 
 	UserMap[req.Id].scorearray[whatInt] = val
 	resetDice(req.Id)
-	info(fmt.Sprint(UserMap[req.Id].scorearray))
 }
 
 func calculateTotal(id string) (int, int) {

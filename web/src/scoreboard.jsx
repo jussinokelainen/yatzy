@@ -22,7 +22,7 @@ const indexTextToInt = new Map([
     ["quintuples", 14],
 ]);
 
-async function getScores() {
+export async function getScores() {
     const response = await makeGETrequest(`getScoresByID/${getUserKey()}`)
     if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
@@ -36,7 +36,7 @@ function SelectButton({ position, reset }) {
     const [text, setText] = useState('select')
     async function handleClick() {
         const id = getUserKey()
-        makePOSTrequest(`selectItem/${position}`, { id: id })
+        await makePOSTrequest(`selectItem/${position}`, { id: id })
         const data = await getScores(id)
         setText(data.scores[indexTextToInt.get(position)])
         total = data.total

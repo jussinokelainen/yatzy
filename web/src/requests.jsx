@@ -28,9 +28,9 @@ export async function loadLb(setlb, type) {
   }
 }
 
-export function makePOSTrequest(url, body) {
+export async function makePOSTrequest(url, body) {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
-  fetch(fullUrl, {
+  await fetch(fullUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

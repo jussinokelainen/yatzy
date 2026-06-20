@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"strconv"
@@ -25,7 +24,6 @@ func rollDice(c *gin.Context) {
 		values[i] = dicearr[i].value
 	}
 
-	info(fmt.Sprint(values))
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success": true,
 		"values":  values,
