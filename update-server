@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+git pull
+make restart
+tmux neww -n logs docker compose logs -f
