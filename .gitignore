@@ -13,7 +13,7 @@ dist-ssr
 *.local
 
 # Binaries
-server/server
+bin/
 
 # Editor directories and files
 .DS_Store

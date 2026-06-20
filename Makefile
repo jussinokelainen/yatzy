@@ -14,7 +14,8 @@ restart: build
 server:
 	@printf "\e[31mCompiling server...\e[0m\n"
 
-	@cd ./server/ && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server
+	@mkdir -p ./bin
+	@cd ./server/ && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../bin/server
 	@printf "[\e[32m OK \e[0m] Compiling server done\n"
 
 web: web/node_modules
@@ -29,7 +30,7 @@ web/node_modules: ./web/package-lock.json
 
 clean:
 	@printf "\e[31mCleaning up...\e[0m"
-	@rm -rf ./server/server
+	@rm -rf ./bin/
 	@rm -rf ./web/node_modules/
 	@rm -rf ./web/dist/
 	@printf "\r\e[0K"
