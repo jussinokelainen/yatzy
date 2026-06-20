@@ -2,7 +2,6 @@ export const PORT = 2222; // Go server port
 
 // Load leaderboard
 export async function loadLb(setlb, type) {
-  console.log('Fetching leaderboard')
   let apiUrl = ``;
   if (type === 'name') {
     apiUrl = `api/getscores`

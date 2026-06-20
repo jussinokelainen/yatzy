@@ -54,8 +54,8 @@ const App = () => {
   }
 
   async function endGame() {
-    makePOSTrequest('end', { id: getUserKey(), name })
-    const data = await getScores(id)
+    await makePOSTrequest('end', { id: getUserKey(), name })
+    const data = await getScores(getUserKey())
     setTotal(data.total)
   }
 
