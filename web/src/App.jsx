@@ -29,6 +29,7 @@ const App = () => {
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
+  const [wasSaved, setWasSaved] = useState(false)
 
   function startGame() {
     const hasKey = checkUserKey()
@@ -51,10 +52,14 @@ const App = () => {
     setShowLb(false)
     setRollCount(0)
     setTotal(0)
+    setWasSaved(false)
   }
 
   async function endGame() {
-    await makePOSTrequest('end', { id: getUserKey(), name })
+    if (!wasSaved) {
+      await makePOSTrequest('end', { id: getUserKey(), name })
+      setWasSaved(true)
+    }
     const data = await getScores(getUserKey())
     setTotal(data.total)
   }
