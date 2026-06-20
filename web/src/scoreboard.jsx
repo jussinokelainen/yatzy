@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { makePOSTrequest, makeGETrequest } from "./requests";
 import { getUserKey } from "./userkeys";
+import { preClicked } from "./App";
 
 let total = 0
 let subTotal = 0
@@ -31,18 +32,24 @@ export async function getScores() {
     return data
 }
 
-function SelectButton({ position, reset }) {
+function SelectButton({ position, reset, idx }) {
     const [clicked, setClicked] = useState(false)
     const [text, setText] = useState('select')
-    async function handleClick() {
-        const id = getUserKey()
-        await makePOSTrequest(`selectItem/${position}`, { id: id })
+    async function setAsClicked(id) {
         const data = await getScores(id)
         setText(data.scores[indexTextToInt.get(position)])
         total = data.total
         subTotal = data.subTotal
-        reset()
         setClicked(true)
+    }
+    async function handleClick() {
+        const id = getUserKey()
+        await makePOSTrequest(`selectItem/${position}`, { id: id })
+        await setAsClicked(id)
+        reset()
+    }
+    if (preClicked[idx]) {
+        setAsClicked(getUserKey())
     }
 
     if (clicked) { return (<p className="select-container">{text}</p>) }
@@ -57,27 +64,27 @@ export function Scoreboard(props) {
             <tbody className="scoreboard1-container">
                 <tr>
                     <td>{<div className='dices1'></div>}</td>
-                    <td><SelectButton position={"one"} reset={props.reset} /></td>
+                    <td><SelectButton position={"one"} reset={props.reset} idx={0} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices2'></div>}</td>
-                    <td><SelectButton position={"two"} reset={props.reset} /></td>
+                    <td><SelectButton position={"two"} reset={props.reset} idx={1} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices3'></div>}</td>
-                    <td><SelectButton position={"three"} reset={props.reset} /></td>
+                    <td><SelectButton position={"three"} reset={props.reset} idx={2} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices4'></div>}</td>
-                    <td><SelectButton position={"four"} reset={props.reset} /></td>
+                    <td><SelectButton position={"four"} reset={props.reset} idx={3} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices5'></div>}</td>
-                    <td><SelectButton position={"five"} reset={props.reset} /></td>
+                    <td><SelectButton position={"five"} reset={props.reset} idx={4} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices6'></div>}</td>
-                    <td><SelectButton position={"six"} reset={props.reset} /></td>
+                    <td><SelectButton position={"six"} reset={props.reset} idx={5} /></td>
                 </tr>
             </tbody>
             <tbody className="scoreboard2-container">
@@ -89,39 +96,39 @@ export function Scoreboard(props) {
             <tbody className="scoreboard3-container">
                 <tr>
                     <td>{<div className='pair'></div>}</td>
-                    <td><SelectButton position={"pair"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"pair"} reset={props.reset} idx={6} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='doublepair'></div>}</td>
-                    <td><SelectButton position={"doublepair"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"doublepair"} reset={props.reset} idx={7} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='triples'></div>}</td>
-                    <td><SelectButton position={"triples"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"triples"} reset={props.reset} idx={8} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='quadruples'></div>}</td>
-                    <td><SelectButton position={"quadruples"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"quadruples"} reset={props.reset} idx={9} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='smallstraight'></div>}</td>
-                    <td><SelectButton position={"smallstraight"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"smallstraight"} reset={props.reset} idx={10} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='bigstraight'></div>}</td>
-                    <td><SelectButton position={"bigstraight"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"bigstraight"} reset={props.reset} idx={11} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='fullhouse'></div>}</td>
-                    <td><SelectButton position={"fullhouse"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"fullhouse"} reset={props.reset} idx={12} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='sattuma'></div>}</td>
-                    <td><SelectButton position={"mixed"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"mixed"} reset={props.reset} idx={13} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='jatsi'></div>}</td>
-                    <td><SelectButton position={"quintuples"} reset={props.reset} text={"select"} /></td>
+                    <td><SelectButton position={"quintuples"} reset={props.reset} idx={14} /></td>
                 </tr>
             </tbody>
             <tbody className="scoreboard4-container">

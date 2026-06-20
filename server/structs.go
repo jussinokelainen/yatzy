@@ -1,5 +1,13 @@
 package main
 
+type progressData struct {
+	Name     string `json:"name"`
+	Id       string `json:"id"`
+	Scorerow string `json:"scorerow"`
+	Clicked  string `json:"clicked"`
+	Roundnum int    `json:"roundnum"`
+}
+
 type UserDataStruct struct {
 	Name  string `json:"name"`
 	Score int    `json:"score"`

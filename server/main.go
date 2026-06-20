@@ -13,6 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const MAX_ROUND = 15
+
 var db *sql.DB
 var (
 	port     = 5432
@@ -69,12 +71,12 @@ func main() {
 		api.GET("/getstats", getStatsById)
 	}
 
-	router.POST("/start", startGame)
 	router.POST("/end", endGame)
 	router.POST("/restart", restartGame)
 	router.POST("/lockDice/:dice", lockDice)
 	router.POST("/selectItem/:what", itemSelector)
 
+	router.GET("/start/:id/:name", startGame)
 	router.GET("/rollDice/:id", rollDice)
 	router.GET("/getScoresByID/:id", sendScoresByID)
 

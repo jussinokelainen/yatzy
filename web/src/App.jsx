@@ -8,6 +8,7 @@ import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
 
+export let preClicked = {}
 
 const diceImages = new Map([
   [0, 'dice0'],
@@ -29,9 +30,8 @@ const App = () => {
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
-  const [wasSaved, setWasSaved] = useState(false)
 
-  function startGame() {
+  async function startGame() {
     const hasKey = checkUserKey()
     try {
       hasKey ? null : createUserKey()
@@ -39,7 +39,16 @@ const App = () => {
       console.log('Cannot access localStorage:', e);
     }
 
-    makePOSTrequest('start', { id: getUserKey(), name })
+    const response = await makeGETrequest(`start/${getUserKey()}/${name}`)
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const data = await getScores(getUserKey())
+    setTotal(data.total)
+    const progressData = await response.json();
+    preClicked = progressData.clickedrow
+    setRoundNum(progressData.roundnum)
     setNameIsSet(true)
   }
 
@@ -52,14 +61,9 @@ const App = () => {
     setShowLb(false)
     setRollCount(0)
     setTotal(0)
-    setWasSaved(false)
   }
 
   async function endGame() {
-    if (!wasSaved) {
-      await makePOSTrequest('end', { id: getUserKey(), name })
-      setWasSaved(true)
-    }
     const data = await getScores(getUserKey())
     setTotal(data.total)
   }

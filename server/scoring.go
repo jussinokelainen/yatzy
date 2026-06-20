@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,16 +11,40 @@ import (
 var UserMap = map[string]*GameData{}
 
 func InitUser(id string, name string) {
+	progress := loadProgress(id)
 	var newUser GameData
-	newUser.name = name
-	newUser.turnCount = 0
+	if progress.Name != "" {
+		newUser.name = progress.Name
+	} else {
+		newUser.name = name
+	}
+	newUser.turnCount = progress.Roundnum
 	for i := range newUser.diceArray {
 		newUser.diceArray[i].value = 0
 		newUser.diceArray[i].locked = false
 	}
 
-	for i := range newUser.clickedarray {
-		newUser.clickedarray[i] = false
+	parsedClicks := strings.Split(progress.Clicked, ";")
+	if len(parsedClicks) == len(newUser.clickedarray) {
+		for i := range newUser.clickedarray {
+			newUser.clickedarray[i], _ = strconv.ParseBool(parsedClicks[i])
+		}
+	} else {
+		for i := range newUser.clickedarray {
+			newUser.clickedarray[i] = false
+		}
+	}
+
+	parsedScores := strings.Split(progress.Scorerow, ";")
+	if len(parsedScores) == len(newUser.scorearray) {
+		for i := range newUser.scorearray {
+			parsedVal, _ := strconv.ParseInt(parsedScores[i], 10, 0)
+			newUser.scorearray[i] = int(parsedVal)
+		}
+	} else {
+		for i := range newUser.scorearray {
+			newUser.scorearray[i] = 0
+		}
 	}
 
 	UserMap[id] = &newUser
@@ -119,8 +142,19 @@ func itemSelector(c *gin.Context) {
 	UserMap[req.Id].scorearray[whatInt] = val
 	UserMap[req.Id].clickedarray[whatInt] = true
 	UserMap[req.Id].turnCount += 1
-	info(fmt.Sprint(UserMap[req.Id].clickedarray))
-	info(fmt.Sprint(UserMap[req.Id].turnCount))
+	if UserMap[req.Id].turnCount >= MAX_ROUND {
+		info("max round, game over")
+		total, _ := calculateTotal(req.Id)
+		row := getScoreRow(req.Id)
+		err = addScore(UserMap[req.Id].name, total, req.Id, row)
+	}
+	var progress progressData
+	progress.Name = UserMap[req.Id].name
+	progress.Id = req.Id
+	progress.Scorerow = getScoreRow(req.Id)
+	progress.Clicked = getClickedRow(req.Id)
+	progress.Roundnum = UserMap[req.Id].turnCount
+	saveProgress(progress)
 	resetDice(req.Id)
 }
 
@@ -142,6 +176,18 @@ func calculateTotal(id string) (int, int) {
 		total += scoreRow[i]
 	}
 	return total, subTotal
+}
+
+func getClickedRow(id string) string {
+	clickedRow := UserMap[id].clickedarray
+	var stringarr [15]string
+
+	for i := range clickedRow {
+		stringarr[i] = strconv.FormatBool(clickedRow[i])
+	}
+	row := strings.Join(stringarr[:], ";")
+
+	return row
 }
 
 func getScoreRow(id string) string {

@@ -6,6 +6,82 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func saveProgress(progress progressData) error {
+	sqlStatement := `
+		INSERT INTO in_progress (
+			name, id, scorerow, clicked, roundnum
+		)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (id)
+		DO UPDATE SET
+			name = EXCLUDED.name,
+			scorerow = EXCLUDED.scorerow,
+			clicked = EXCLUDED.clicked,
+			roundnum = EXCLUDED.roundnum;
+	`
+
+	_, err := db.Exec(
+		sqlStatement,
+		progress.Name,
+		progress.Id,
+		progress.Scorerow,
+		progress.Clicked,
+		progress.Roundnum,
+	)
+
+	return err
+}
+
+func loadProgress(id string) progressData {
+	var data progressData
+
+	sqlStatement := `
+		SELECT
+			name,
+			id,
+			scorerow,
+			clicked,
+			roundnum
+		FROM
+			in_progress
+		WHERE
+			id = $1;
+	`
+
+	rows, err := db.Query(sqlStatement, id)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(
+			&data.Name,
+			&data.Id,
+			&data.Scorerow,
+			&data.Clicked,
+			&data.Roundnum,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return data
+}
+
+func deleteProgress(id string) error {
+	sqlStatement := `DELETE FROM in_progress WHERE id = $1;`
+
+	_, err := db.Exec(sqlStatement, id)
+
+	return err
+}
+
 func getStatsById(c *gin.Context) {
 	type StatStruct struct {
 		Name  string `json:"name"`
