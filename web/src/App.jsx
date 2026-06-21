@@ -69,10 +69,12 @@ const App = () => {
   }
 
   function toggleLock(i) {
-    makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
-    const newLocks = [...lockState]
-    newLocks[i] = !newLocks[i]
-    setLockState(newLocks)
+    if (diceState[i] != 0) {
+      makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
+      const newLocks = [...lockState]
+      newLocks[i] = !newLocks[i]
+      setLockState(newLocks)
+    }
   };
 
   function simulateRollOnce() {
