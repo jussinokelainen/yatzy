@@ -44,8 +44,6 @@ const App = () => {
       throw new Error(`Server error: ${response.status}`);
     }
 
-    const data = await getScores(getUserKey())
-    setTotal(data.total)
     const progressData = await response.json();
     preClicked = progressData.clickedrow
     setRoundNum(progressData.roundnum)

@@ -4,7 +4,8 @@ import "sort"
 
 func getDiceValuesArray(id string) [5]int {
 	var valuesArray [5]int
-	dicearr := &UserMap[id].diceArray
+	currentGame := loadCurrentGame(id)
+	dicearr := &currentGame.diceArray
 	for i := range valuesArray {
 		valuesArray[i] = dicearr[i].value
 	}

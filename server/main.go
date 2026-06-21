@@ -23,9 +23,9 @@ var (
 	dbname   = os.Getenv("DATABASE_NAME")
 )
 
-func info(msg string) {
-	fmt.Println("[\033[35m INFO \033[0m] ", msg)
-}
+func ok(msg string)     { fmt.Println("[\033[32m OK \033[0m] ", msg) }
+func info(msg string)   { fmt.Println("[\033[35m INFO \033[0m] ", msg) }
+func errout(msg string) { fmt.Println("[\033[31m ERROR \033[0m] ", msg) }
 
 // Function to open a connection to the database
 func openDatabase() *sql.DB {

@@ -54,7 +54,7 @@ func restartGame(c *gin.Context) {
 		return
 	}
 
-	delete(UserMap, req.Id)
+	deleteCurrentGame(req.Id)
 	deleteProgress(req.Id)
 
 	c.IndentedJSON(http.StatusOK, "Game reset")

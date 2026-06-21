@@ -6,9 +6,34 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
-var UserMap = map[string]*GameData{}
+// Parses the dice values stored in GameData
+// into separate arrays of dice values and lock states
+func parseDiceArrays(array [5]DiceData) ([5]int, [5]bool) {
+	var values [5]int
+	var locked [5]bool
+	for i := range array {
+		values[i] = array[i].value
+		locked[i] = array[i].locked
+	}
+
+	return values, locked
+}
+
+// Connects arrays of dice values and lockstates into
+// a DiceData struct array that can be used in GameData
+func formDiceArray(values pq.Int32Array, locked pq.BoolArray) [5]DiceData {
+	var data [5]DiceData
+
+	for i := range data {
+		data[i].value = int(values[i])
+		data[i].locked = locked[i]
+	}
+
+	return data
+}
 
 func InitUser(id string, name string) {
 	progress := loadProgress(id)
@@ -47,13 +72,14 @@ func InitUser(id string, name string) {
 		}
 	}
 
-	UserMap[id] = &newUser
+	updateCurrentGame(id, newUser)
 }
 
 func sendScoresByID(c *gin.Context) {
 	id := c.Param("id")
 
-	scoreRow := UserMap[id].scorearray
+	currentGame := loadCurrentGame(id)
+	scoreRow := currentGame.scorearray
 	total, subTotal := calculateTotal(id)
 
 	c.IndentedJSON(http.StatusOK, gin.H{
@@ -139,27 +165,31 @@ func itemSelector(c *gin.Context) {
 
 	}
 
-	UserMap[req.Id].scorearray[whatInt] = val
-	UserMap[req.Id].clickedarray[whatInt] = true
-	UserMap[req.Id].turnCount += 1
-	if UserMap[req.Id].turnCount >= MAX_ROUND {
+	currentGame := loadCurrentGame(req.Id)
+	currentGame.scorearray[whatInt] = val
+	currentGame.clickedarray[whatInt] = true
+	currentGame.turnCount += 1
+	if currentGame.turnCount >= MAX_ROUND {
 		info("max round, game over")
 		total, _ := calculateTotal(req.Id)
 		row := getScoreRow(req.Id)
-		err = addScore(UserMap[req.Id].name, total, req.Id, row)
+		err = addScore(currentGame.name, total, req.Id, row)
 	}
 	var progress progressData
-	progress.Name = UserMap[req.Id].name
+	progress.Name = currentGame.name
 	progress.Id = req.Id
 	progress.Scorerow = getScoreRow(req.Id)
 	progress.Clicked = getClickedRow(req.Id)
-	progress.Roundnum = UserMap[req.Id].turnCount
+	progress.Roundnum = currentGame.turnCount
+	// Dont know if this is needed
+	// updateCurrentGame(req.Id, currentGame)
 	saveProgress(progress)
 	resetDice(req.Id)
 }
 
 func calculateTotal(id string) (int, int) {
-	scoreRow := UserMap[id].scorearray
+	currentGame := loadCurrentGame(id)
+	scoreRow := currentGame.scorearray
 	total := 0
 	subTotal := 0
 	for i := range 6 {
@@ -179,7 +209,8 @@ func calculateTotal(id string) (int, int) {
 }
 
 func getClickedRow(id string) string {
-	clickedRow := UserMap[id].clickedarray
+	currentGame := loadCurrentGame(id)
+	clickedRow := currentGame.clickedarray
 	var stringarr [15]string
 
 	for i := range clickedRow {
@@ -191,7 +222,8 @@ func getClickedRow(id string) string {
 }
 
 func getScoreRow(id string) string {
-	scoreRow := UserMap[id].scorearray
+	currentGame := loadCurrentGame(id)
+	scoreRow := currentGame.scorearray
 	var stringarr [15]string
 
 	for i := range scoreRow {

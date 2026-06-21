@@ -10,7 +10,8 @@ import (
 
 func rollDice(c *gin.Context) {
 	id := c.Param("id")
-	dicearr := &UserMap[id].diceArray
+	currentGame := loadCurrentGame(id)
+	dicearr := &currentGame.diceArray
 
 	for i := range dicearr {
 		newVal := rand.IntN(6) + 1
@@ -19,6 +20,7 @@ func rollDice(c *gin.Context) {
 		}
 	}
 
+	updateCurrentGame(id, currentGame)
 	var values [5]int
 	for i := range dicearr {
 		values[i] = dicearr[i].value
@@ -44,17 +46,21 @@ func lockDice(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	dicearr := &UserMap[req.Id].diceArray[dice]
+	currentGame := loadCurrentGame(req.Id)
+	dicearr := &currentGame.diceArray[dice]
 	dicearr.locked = !dicearr.locked
+	updateCurrentGame(req.Id, currentGame)
 
 	c.IndentedJSON(http.StatusOK, "Lock status updated")
 }
 
 func resetDice(id string) {
-	dicearr := &UserMap[id].diceArray
+	currentGame := loadCurrentGame(id)
+	dicearr := &currentGame.diceArray
 
 	for i := range dicearr {
 		dicearr[i].value = 0
 		dicearr[i].locked = false
 	}
+	updateCurrentGame(id, currentGame)
 }

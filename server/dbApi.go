@@ -1,10 +1,124 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
+
+// Adds a new ongoing game to the database, or edits and existing one
+// if there is one with given id
+func updateCurrentGame(id string, data GameData) error {
+	sqlStatement := `
+		INSERT INTO usermap (
+			id,
+			name,
+			scorearray,
+			clickedarray,
+			dicevalue,
+			dicelocked,
+			turncount
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (id)
+		DO UPDATE SET
+			name = EXCLUDED.name,
+			scorearray = EXCLUDED.scorearray,
+			clickedarray = EXCLUDED.clickedarray,
+			dicevalue = EXCLUDED.dicevalue,
+			dicelocked = EXCLUDED.dicelocked,
+			turncount = EXCLUDED.turncount;
+	`
+
+	dicevalues, dicelocked := parseDiceArrays(data.diceArray)
+	_, err := db.Exec(
+		sqlStatement,
+		id,
+		data.name,
+		pq.Array(data.scorearray),
+		pq.Array(data.clickedarray),
+		pq.Array(dicevalues),
+		pq.Array(dicelocked),
+		data.turnCount,
+	)
+	if err != nil {
+		errout(fmt.Sprint(err))
+	}
+	info("updated current game to:")
+	info(fmt.Sprint(data))
+
+	return err
+}
+
+// Load data of ongoing game with given id
+func loadCurrentGame(id string) GameData {
+	var data GameData
+	dicevalues := pq.Int32Array{}
+	dicelocked := pq.BoolArray{}
+	pq_scorearray := pq.Int32Array{}
+	pq_clickedarray := pq.BoolArray{}
+
+	sqlStatement := `
+		SELECT
+			name,
+			scorearray,
+			clickedarray,
+			dicevalue,
+			dicelocked,
+			turncount
+		FROM
+			usermap
+		WHERE
+			id = $1;
+	`
+
+	rows, err := db.Query(sqlStatement, id)
+	if err != nil {
+		panic(err)
+	}
+	info(fmt.Sprint(rows.Columns()))
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(
+			&data.name,
+			&pq_scorearray,
+			&pq_clickedarray,
+			&dicevalues,
+			&dicelocked,
+			&data.turnCount,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	tmp_scorearray := []int32(pq_scorearray)
+	for i := range 15 {
+		data.scorearray[i] = int(tmp_scorearray[i])
+		data.clickedarray[i] = pq_clickedarray[i]
+	}
+
+	data.diceArray = formDiceArray(dicevalues, dicelocked)
+
+	info("loaded data:")
+	info(fmt.Sprint(data))
+	return data
+}
+
+func deleteCurrentGame(id string) error {
+	sqlStatement := `DELETE FROM usermap WHERE id = $1;`
+
+	_, err := db.Exec(sqlStatement, id)
+
+	return err
+}
 
 func saveProgress(progress progressData) error {
 	sqlStatement := `
