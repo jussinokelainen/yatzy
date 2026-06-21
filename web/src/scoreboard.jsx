@@ -50,6 +50,7 @@ function SelectButton({ position, reset, idx }) {
     }
     if (preClicked[idx]) {
         setAsClicked(getUserKey())
+        preClicked[idx] = false
     }
 
     if (clicked) { return (<p className="select-container">{text}</p>) }
