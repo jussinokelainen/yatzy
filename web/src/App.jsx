@@ -52,8 +52,7 @@ const App = () => {
     setNameIsSet(true)
   }
 
-  function restartGame() {
-    makePOSTrequest('restart', { id: getUserKey(), name })
+  function resetClient() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
     setNameIsSet(false)
@@ -61,6 +60,11 @@ const App = () => {
     setShowLb(false)
     setRollCount(0)
     setTotal(0)
+  }
+
+  function restartGame() {
+    makePOSTrequest('restart', { id: getUserKey(), name })
+    resetClient()
   }
 
   async function endGame() {
@@ -221,7 +225,7 @@ const App = () => {
             ))}
             <tr>
               <td colSpan={LBWIDTH} className="leaderboard-screen">
-                <Button handleClick={restartGame} text='Back' className="gameover-buttons" />
+                <Button handleClick={resetClient} text='Back' className="gameover-buttons" />
               </td>
             </tr>
           </tbody>
