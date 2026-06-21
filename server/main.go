@@ -71,7 +71,6 @@ func main() {
 		api.GET("/getstats", getStatsById)
 	}
 
-	router.POST("/end", endGame)
 	router.POST("/restart", restartGame)
 	router.POST("/lockDice/:dice", lockDice)
 	router.POST("/selectItem/:what", itemSelector)

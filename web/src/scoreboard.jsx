@@ -41,12 +41,12 @@ function SelectButton({ position, reset, idx }) {
         total = data.total
         subTotal = data.subTotal
         setClicked(true)
-        reset()
     }
     async function handleClick() {
         const id = getUserKey()
         await makePOSTrequest(`selectItem/${position}`, { id: id })
         await setAsClicked(id)
+        reset()
     }
     if (preClicked[idx]) {
         setAsClicked(getUserKey())

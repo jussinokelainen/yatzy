@@ -48,23 +48,6 @@ func startGame(c *gin.Context) {
 	})
 }
 
-func endGame(c *gin.Context) {
-	req, err := getReq(c)
-	if err != nil {
-		return
-	}
-
-	total, _ := calculateTotal(req.Id)
-	row := getScoreRow(req.Id)
-	err = addScore(req.Name, total, req.Id, row)
-	if err != nil {
-		c.IndentedJSON(500, gin.H{"error": "failed to add score"})
-		panic(err)
-	}
-
-	c.IndentedJSON(http.StatusOK, "Score saved")
-}
-
 func restartGame(c *gin.Context) {
 	req, err := getReq(c)
 	if err != nil {
