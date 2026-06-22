@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,7 +43,8 @@ func updateCurrentGame(id string, data GameData) error {
 		data.turnCount,
 	)
 	if err != nil {
-		errout(fmt.Sprint(err))
+		errout("Error updating current game values")
+		errout(err)
 	}
 
 	return err
@@ -74,7 +74,8 @@ func loadCurrentGame(id string) GameData {
 
 	rows, err := db.Query(sqlStatement, id)
 	if err != nil {
-		panic(err)
+		errout("Error loading current game values")
+		errout(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -87,13 +88,15 @@ func loadCurrentGame(id string) GameData {
 			&data.turnCount,
 		)
 		if err != nil {
-			panic(err)
+			errout("Error parsing current game values")
+			errout(err)
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
-		panic(err)
+		errout("Error in loaded current game rows")
+		errout(err)
 	}
 
 	tmp_scorearray := []int32(pq_scorearray)
@@ -159,7 +162,8 @@ func loadProgress(id string) progressData {
 
 	rows, err := db.Query(sqlStatement, id)
 	if err != nil {
-		panic(err)
+		errout("Error loading progress data")
+		errout(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -171,13 +175,15 @@ func loadProgress(id string) progressData {
 			&data.Roundnum,
 		)
 		if err != nil {
-			panic(err)
+			errout("Error parsing progress data")
+			errout(err)
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
-		panic(err)
+		errout("Error in progress data rows")
+		errout(err)
 	}
 
 	return data
@@ -205,21 +211,24 @@ func getStatsById(c *gin.Context) {
 	                 FROM results GROUP BY id ORDER BY score DESC;`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		panic(err)
+		errout("Error getting stats grouped by id")
+		errout(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var row StatStruct
 		err = rows.Scan(&row.Name, &row.Score, &row.Count)
 		if err != nil {
-			panic(err)
+			errout("Error parsing id grouped data")
+			errout(err)
 		}
 		results = append(results, row)
 	}
 
 	err = rows.Err()
 	if err != nil {
-		panic(err)
+		errout("Error in id grouped rows")
+		errout(err)
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success": true,
@@ -233,21 +242,24 @@ func getTopScores(c *gin.Context) {
 	sqlStatement := `SELECT name, score FROM results ORDER BY score DESC LIMIT 20;`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		panic(err)
+		errout("Error in getting top scores")
+		errout(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var row UserDataStruct
 		err = rows.Scan(&row.Name, &row.Score)
 		if err != nil {
-			panic(err)
+			errout("Error parsing top score data")
+			errout(err)
 		}
 		results = append(results, row)
 	}
 
 	err = rows.Err()
 	if err != nil {
-		panic(err)
+		errout("Error in top score rows")
+		errout(err)
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success": true,

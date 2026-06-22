@@ -34,7 +34,8 @@ func openDatabase() *sql.DB {
 		port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		errout("Error opening database")
+		errout(err)
 	}
 
 	return db
