@@ -15,7 +15,6 @@ services:
 
   web:
     build: .
-    platform: linux/arm64
     depends_on:
       - db
     ports:

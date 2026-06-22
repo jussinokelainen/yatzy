@@ -1,6 +1,5 @@
 import './App.css'
-import Button from './buttons/button'
-import Button2 from './buttons/button2'
+import { Button, Button2 } from './buttons'
 import { useState } from 'react'
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
 import { Scoreboard, getScores } from './scoreboard'
