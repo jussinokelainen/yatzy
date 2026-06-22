@@ -162,6 +162,16 @@ func itemSelector(c *gin.Context) {
 	currentGame.clickedarray[itemInt] = true
 	currentGame.turnCount += 1
 
+	var progress progressData
+	progress.Name = currentGame.name
+	progress.Id = req.Id
+	progress.Scorerow = getScoreRow(req.Id)
+	progress.Clicked = getClickedRow(req.Id)
+	progress.Roundnum = currentGame.turnCount
+	updateCurrentGame(req.Id, currentGame)
+	saveProgress(progress)
+	resetDice(req.Id)
+
 	// Check if the game is over
 	if currentGame.turnCount >= MAX_ROUND {
 		total, _ := calculateTotal(req.Id)
@@ -172,16 +182,6 @@ func itemSelector(c *gin.Context) {
 			errout(err)
 		}
 	}
-
-	var progress progressData
-	progress.Name = currentGame.name
-	progress.Id = req.Id
-	progress.Scorerow = getScoreRow(req.Id)
-	progress.Clicked = getClickedRow(req.Id)
-	progress.Roundnum = currentGame.turnCount
-	updateCurrentGame(req.Id, currentGame)
-	saveProgress(progress)
-	resetDice(req.Id)
 }
 
 // Function to calculate the total and subtotal for given id

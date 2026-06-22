@@ -10,7 +10,6 @@ import (
 
 // Rolls the dice for given id, returns them to the caller as JSON
 func rollDice(c *gin.Context) {
-	info("Rolling dice")
 	id := c.Param("id")
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
@@ -31,7 +30,6 @@ func rollDice(c *gin.Context) {
 		values[i] = dicearr[i].value
 	}
 
-	info("Rolled dice to", values)
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success": true,
 		"values":  values,
