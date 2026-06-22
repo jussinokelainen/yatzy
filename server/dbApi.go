@@ -10,7 +10,6 @@ import (
 // Adds a new ongoing game to the database, or edits and existing one
 // if there is one with given id
 func updateCurrentGame(id string, data GameData) error {
-	info("updateCurrentGame start")
 	sqlStatement := `
 		INSERT INTO usermap (
 			id,
@@ -48,13 +47,11 @@ func updateCurrentGame(id string, data GameData) error {
 		errout(err)
 	}
 
-	info("updateCurrentGame end")
 	return err
 }
 
 // Load data of ongoing game with given id
 func loadCurrentGame(id string) GameData {
-	info("loadCurrentGame start")
 	var data GameData
 	dicevalues := pq.Int32Array{}
 	dicelocked := pq.BoolArray{}
@@ -97,24 +94,20 @@ func loadCurrentGame(id string) GameData {
 
 	data.diceArray = formDiceArray(dicevalues, dicelocked)
 
-	info("loadCurrentGame end")
 	return data
 }
 
 // Delete ongoing game for given id from the database
 func deleteCurrentGame(id string) error {
-	info("deleteCurrentGame start")
 	sqlStatement := `DELETE FROM usermap WHERE id = $1;`
 
 	_, err := db.Exec(sqlStatement, id)
 
-	info("deleteCurrentGame end")
 	return err
 }
 
 // Save progress of a game for given player
 func saveProgress(progress progressData) error {
-	info("saveProgress start")
 	sqlStatement := `
 		INSERT INTO in_progress (
 			name, id, scorerow, clicked, roundnum
@@ -137,13 +130,11 @@ func saveProgress(progress progressData) error {
 		progress.Roundnum,
 	)
 
-	info("saveProgress end")
 	return err
 }
 
 // Load progress of player with given id
 func loadProgress(id string) progressData {
-	info("loadProgress start")
 	var data progressData
 
 	sqlStatement := `
@@ -172,25 +163,21 @@ func loadProgress(id string) progressData {
 		errout(err)
 	}
 
-	info("loadProgress end")
 	return data
 }
 
 // Delete progress of player with given id
 func deleteProgress(id string) error {
-	info("deleteProgress start")
 	sqlStatement := `DELETE FROM in_progress WHERE id = $1;`
 
 	_, err := db.Exec(sqlStatement, id)
 
-	info("deleteProgress end")
 	return err
 }
 
 // Get the name, max score and games played
 // of each id in the results database table
 func getStatsById(c *gin.Context) {
-	info("getStatsById start")
 	type StatStruct struct {
 		Name  string `json:"name"`
 		Score int    `json:"score"`
@@ -227,12 +214,10 @@ func getStatsById(c *gin.Context) {
 		"success": true,
 		"result":  results,
 	})
-	info("getStatsById end")
 }
 
 // Get the top 20 scores in the results database table
 func getTopScores(c *gin.Context) {
-	info("getTopScores start")
 	results := []UserDataStruct{}
 
 	sqlStatement := `SELECT name, score FROM results ORDER BY score DESC LIMIT 20;`
@@ -261,14 +246,11 @@ func getTopScores(c *gin.Context) {
 		"success": true,
 		"result":  results,
 	})
-	info("getTopScores end")
 }
 
 // Add a new score to the results
 func addScore(name string, score int, id string, row string) error {
-	info("addScore start")
 	sqlStatement := `INSERT INTO results(name, score, id, row) VALUES($1, $2, $3, $4);`
 	_, err := db.Exec(sqlStatement, name, score, id, row)
-	info("addScore end")
 	return err
 }

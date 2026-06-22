@@ -12,7 +12,6 @@ import (
 // Parses the dice values stored in GameData
 // into separate arrays of dice values and lock states
 func parseDiceArrays(array [5]DiceData) ([5]int, [5]bool) {
-	info("parseDiceArrays start")
 	var values [5]int
 	var locked [5]bool
 	for i := range array {
@@ -20,14 +19,12 @@ func parseDiceArrays(array [5]DiceData) ([5]int, [5]bool) {
 		locked[i] = array[i].locked
 	}
 
-	info("parseDiceArrays end")
 	return values, locked
 }
 
 // Connects arrays of dice values and lockstates into
 // a DiceData struct array that can be used in GameData
 func formDiceArray(values pq.Int32Array, locked pq.BoolArray) [5]DiceData {
-	info("formDiceArray start")
 	var data [5]DiceData
 
 	for i := range data {
@@ -35,13 +32,11 @@ func formDiceArray(values pq.Int32Array, locked pq.BoolArray) [5]DiceData {
 		data[i].locked = locked[i]
 	}
 
-	info("formDiceArray end")
 	return data
 }
 
 // Initializes data for a new game
 func InitUser(id string, name string) {
-	info("InitUser start")
 	progress := loadProgress(id)
 	var newUser GameData
 	if progress.Name != "" {
@@ -79,12 +74,10 @@ func InitUser(id string, name string) {
 	}
 
 	updateCurrentGame(id, newUser)
-	info("InitUser end")
 }
 
 // Loads data of ongoing game and returns it as the http response
 func getScoresByID(c *gin.Context) {
-	info("getScoresByID start")
 	id := c.Param("id")
 
 	currentGame := loadCurrentGame(id)
@@ -97,14 +90,12 @@ func getScoresByID(c *gin.Context) {
 		"total":    total,
 		"subTotal": subTotal,
 	})
-	info("getScoresByID end")
 }
 
 // Switch function used to calculate the correct value
 // for a selected item, so each 15 items dont need their own
 // http request functions
 func itemSelector(c *gin.Context) {
-	info("itemSelector start")
 	item := c.Param("what")
 	itemInt := 0
 	var req idStruct
@@ -191,13 +182,11 @@ func itemSelector(c *gin.Context) {
 	updateCurrentGame(req.Id, currentGame)
 	saveProgress(progress)
 	resetDice(req.Id)
-	info("itemSelector end")
 }
 
 // Function to calculate the total and subtotal for given id
 // returns (total, subTotal)
 func calculateTotal(id string) (int, int) {
-	info("calculateTotal start")
 	currentGame := loadCurrentGame(id)
 	scoreRow := currentGame.scorearray
 	total := 0
@@ -215,14 +204,12 @@ func calculateTotal(id string) (int, int) {
 	for i := 6; i < 15; i++ {
 		total += scoreRow[i]
 	}
-	info("calculateTotal end")
 	return total, subTotal
 }
 
 // Returns the contents of an ongoing game's clicked item boolean
 // values as true/false strings joined as one string separated by ';'
 func getClickedRow(id string) string {
-	info("getClickedRow start")
 	currentGame := loadCurrentGame(id)
 	clickedRow := currentGame.clickedarray
 	var stringarr [15]string
@@ -232,14 +219,12 @@ func getClickedRow(id string) string {
 	}
 	row := strings.Join(stringarr[:], ";")
 
-	info("getClickedRow end")
 	return row
 }
 
 // Returns the contents of an ongoing game's score row integer
 // values as strings joined as one string separated by ';'
 func getScoreRow(id string) string {
-	info("getScoreRow start")
 	currentGame := loadCurrentGame(id)
 	scoreRow := currentGame.scorearray
 	var stringarr [15]string
@@ -249,6 +234,5 @@ func getScoreRow(id string) string {
 	}
 	row := strings.Join(stringarr[:], ";")
 
-	info("getScoreRow end")
 	return row
 }

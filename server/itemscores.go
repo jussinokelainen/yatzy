@@ -3,7 +3,6 @@ package main
 import "sort"
 
 func getDiceValuesArray(id string) [5]int {
-	info("getDiceValuesArray start")
 	var valuesArray [5]int
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
@@ -11,7 +10,6 @@ func getDiceValuesArray(id string) [5]int {
 		valuesArray[i] = dicearr[i].value
 	}
 	sort.Ints(valuesArray[:])
-	info("getDiceValuesArray end")
 	return valuesArray
 }
 

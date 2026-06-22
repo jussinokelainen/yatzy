@@ -32,7 +32,6 @@ func errout(msg ...any) { log.Println(append([]any{"[\033[31m ERROR \033[0m]"}, 
 
 // Function to open a connection to the database
 func openDatabase() *sql.DB {
-	info("openDatabase start")
 	psqlInfo := fmt.Sprintf("host=db port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		port, user, password, dbname)
@@ -42,12 +41,10 @@ func openDatabase() *sql.DB {
 		errout(err)
 	}
 
-	info("openDatabase end")
 	return db
 }
 
 func main() {
-	info("main start")
 	// Setup logging
 	timeNow := time.Now().Format("2006-01-02_15-04-05")
 	logFileName := "/logs/" + timeNow + ".log"
@@ -70,13 +67,13 @@ func main() {
 
 	router := gin.Default()
 
-	router.Use(func(c *gin.Context) {
-		c.Next()
-
-		if c.Writer.Written() {
-			info("STATUS WRITTEN:", c.Writer.Status(), c.FullPath())
-		}
-	})
+	// router.Use(func(c *gin.Context) {
+	// 	c.Next()
+	//
+	// 	if c.Writer.Written() {
+	// 		info("STATUS WRITTEN:", c.Writer.Status(), c.FullPath())
+	// 	}
+	// })
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
@@ -117,5 +114,4 @@ func main() {
 
 	info("Server running...")
 	router.Run("0.0.0.0:2222")
-	info("main end")
 }

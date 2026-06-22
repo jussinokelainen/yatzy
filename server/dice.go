@@ -10,7 +10,7 @@ import (
 
 // Rolls the dice for given id, returns them to the caller as JSON
 func rollDice(c *gin.Context) {
-	info("rollDice start")
+	info("Rolling dice")
 	id := c.Param("id")
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
@@ -31,16 +31,15 @@ func rollDice(c *gin.Context) {
 		values[i] = dicearr[i].value
 	}
 
+	info("Rolled dice to", values)
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success": true,
 		"values":  values,
 	})
-	info("rollDice end")
 }
 
 // Locks dice given as c.Param for id given in request context
 func lockDice(c *gin.Context) {
-	info("lockDice start")
 	diceStr := c.Param("dice")
 	dice, err := strconv.Atoi(diceStr)
 	if err != nil {
@@ -60,12 +59,10 @@ func lockDice(c *gin.Context) {
 	updateCurrentGame(req.Id, currentGame)
 
 	c.IndentedJSON(http.StatusOK, "Lock status updated")
-	info("lockDice end")
 }
 
 // Reset dice to unlocked and 0 for given id
 func resetDice(id string) {
-	info("resetDice start")
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
 
@@ -74,5 +71,4 @@ func resetDice(id string) {
 		dicearr[i].locked = false
 	}
 	updateCurrentGame(id, currentGame)
-	info("resetDice end")
 }

@@ -11,7 +11,6 @@ import (
 // This function might just be useless, it is used one time so it can
 // most likely be moved inside that function
 func getReq(c *gin.Context) (startGameRequest, error) {
-	info("getReq start")
 	var req startGameRequest
 
 	err := c.ShouldBindJSON(&req)
@@ -19,14 +18,12 @@ func getReq(c *gin.Context) (startGameRequest, error) {
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
 
-	info("getReq end")
 	return req, err
 }
 
 // Start a game for given id with given name, loads existing progress
 // and uses that if it exists
 func startGame(c *gin.Context) {
-	info("startGame start")
 	id := c.Param("id")
 	name := c.Param("name")
 
@@ -53,12 +50,10 @@ func startGame(c *gin.Context) {
 		"clickedrow": parsedClickRow,
 		"roundnum":   progress.Roundnum,
 	})
-	info("startGame end")
 }
 
 // Delete ongoing game data AND saved progress for given id
 func restartGame(c *gin.Context) {
-	info("restartGame start")
 	req, err := getReq(c)
 	if err != nil {
 		return
@@ -68,5 +63,4 @@ func restartGame(c *gin.Context) {
 	deleteProgress(req.Id)
 
 	c.IndentedJSON(http.StatusOK, "Game reset")
-	info("restartGame end")
 }
