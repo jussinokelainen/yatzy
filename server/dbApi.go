@@ -47,7 +47,7 @@ func updateCurrentGame(id string, data GameData) error {
 		errout(fmt.Sprint(err))
 	}
 	info("updated current game to:")
-	info(fmt.Sprint(data))
+	info(data)
 
 	return err
 }
@@ -78,7 +78,6 @@ func loadCurrentGame(id string) GameData {
 	if err != nil {
 		panic(err)
 	}
-	info(fmt.Sprint(rows.Columns()))
 	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(
@@ -108,7 +107,7 @@ func loadCurrentGame(id string) GameData {
 	data.diceArray = formDiceArray(dicevalues, dicelocked)
 
 	info("loaded data:")
-	info(fmt.Sprint(data))
+	info(data)
 	return data
 }
 

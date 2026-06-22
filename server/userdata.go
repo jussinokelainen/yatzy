@@ -106,63 +106,48 @@ func itemSelector(c *gin.Context) {
 	case "one":
 		val = calculateNumbers(req.Id, 1)
 		whatInt = 0
-
 	case "two":
 		val = calculateNumbers(req.Id, 2)
 		whatInt = 1
-
 	case "three":
 		val = calculateNumbers(req.Id, 3)
 		whatInt = 2
-
 	case "four":
 		val = calculateNumbers(req.Id, 4)
 		whatInt = 3
-
 	case "five":
 		val = calculateNumbers(req.Id, 5)
 		whatInt = 4
-
 	case "six":
 		val = calculateNumbers(req.Id, 6)
 		whatInt = 5
-
 	case "pair":
 		val = calculatePair(req.Id)
 		whatInt = 6
-
 	case "doublepair":
 		val = calculateDoublepair(req.Id)
 		whatInt = 7
-
 	case "triples":
 		val = calculateTriples(req.Id)
 		whatInt = 8
-
 	case "quadruples":
 		val = calculateQuadruples(req.Id)
 		whatInt = 9
-
 	case "smallstraight":
 		val = calculateSmallstraight(req.Id)
 		whatInt = 10
-
 	case "bigstraight":
 		val = calculateBigstraight(req.Id)
 		whatInt = 11
-
 	case "fullhouse":
 		val = calculateFullhouse(req.Id)
 		whatInt = 12
-
 	case "mixed":
 		val = calculateMixed(req.Id)
 		whatInt = 13
-
 	case "quintuples":
 		val = calculateQuintuples(req.Id)
 		whatInt = 14
-
 	}
 
 	currentGame := loadCurrentGame(req.Id)
@@ -181,8 +166,7 @@ func itemSelector(c *gin.Context) {
 	progress.Scorerow = getScoreRow(req.Id)
 	progress.Clicked = getClickedRow(req.Id)
 	progress.Roundnum = currentGame.turnCount
-	// Dont know if this is needed
-	// updateCurrentGame(req.Id, currentGame)
+	updateCurrentGame(req.Id, currentGame)
 	saveProgress(progress)
 	resetDice(req.Id)
 }

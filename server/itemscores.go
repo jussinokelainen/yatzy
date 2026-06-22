@@ -38,7 +38,6 @@ func calculatePair(id string) int {
 	sum := 0
 	for i := 4; i >= 1; i-- {
 		if dicearr[i] == dicearr[i-1] {
-			info("pair found")
 			sum = 2 * dicearr[i]
 			break
 		}
@@ -58,7 +57,6 @@ func calculateDoublepair(id string) int {
 	}
 
 	if paircount >= 2 {
-		info("double pairs found")
 		return sum
 	} else {
 		return 0
@@ -71,7 +69,6 @@ func calculateTriples(id string) int {
 	for i, c := range freqMap {
 		if c >= 3 {
 			sum = 3 * i
-			info("triples found")
 		}
 	}
 	return sum
@@ -83,7 +80,6 @@ func calculateQuadruples(id string) int {
 	for i, c := range freqMap {
 		if c >= 4 {
 			sum = 4 * i
-			info("quadruples found")
 		}
 	}
 	return sum
@@ -93,7 +89,6 @@ func calculateSmallstraight(id string) int {
 	dicearr := getDiceValuesArray(id)
 	expected := [5]int{1, 2, 3, 4, 5}
 	if dicearr == expected {
-		info("Small straight found")
 		return 15
 	}
 
@@ -104,7 +99,6 @@ func calculateBigstraight(id string) int {
 	dicearr := getDiceValuesArray(id)
 	expected := [5]int{2, 3, 4, 5, 6}
 	if dicearr == expected {
-		info("Big straight found")
 		return 20
 	}
 
@@ -127,7 +121,6 @@ func calculateFullhouse(id string) int {
 	}
 
 	if triples && pairs {
-		info("full house found")
 		return sum
 	} else {
 		return 0
@@ -149,7 +142,6 @@ func calculateQuintuples(id string) int {
 	for i, c := range freqMap {
 		if c >= 5 && i != 0 {
 			sum = 50
-			info("yatzy found!")
 		}
 	}
 	return sum
