@@ -70,9 +70,9 @@ const App = () => {
     setTotal(data.total)
   }
 
-  function toggleLock(i) {
+  async function toggleLock(i) {
     if (diceState[i] != 0) {
-      makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
+      await makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
       const newLocks = [...lockState]
       newLocks[i] = !newLocks[i]
       setLockState(newLocks)

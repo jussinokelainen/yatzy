@@ -46,8 +46,6 @@ func updateCurrentGame(id string, data GameData) error {
 	if err != nil {
 		errout(fmt.Sprint(err))
 	}
-	info("updated current game to:")
-	info(data)
 
 	return err
 }
@@ -106,8 +104,6 @@ func loadCurrentGame(id string) GameData {
 
 	data.diceArray = formDiceArray(dicevalues, dicelocked)
 
-	info("loaded data:")
-	info(data)
 	return data
 }
 
