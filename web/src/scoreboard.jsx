@@ -5,6 +5,7 @@ import { preClicked } from "./App";
 
 let total = 0
 let subTotal = 0
+// Map to index all items by their name and number index correctly
 const indexTextToInt = new Map([
     ["one", 0],
     ["two", 1],
@@ -23,6 +24,7 @@ const indexTextToInt = new Map([
     ["quintuples", 14],
 ]);
 
+// Function to get the score of current client id
 export async function getScores() {
     const response = await makeGETrequest(`getScoresByID/${getUserKey()}`)
     if (!response.ok) {
@@ -32,6 +34,7 @@ export async function getScores() {
     return data
 }
 
+// React component used for the button/number of all items in the scoreboard
 function SelectButton({ position, reset, idx }) {
     const [clicked, setClicked] = useState(false)
     const [text, setText] = useState('select')
@@ -48,17 +51,22 @@ function SelectButton({ position, reset, idx }) {
         await setAsClicked(id)
         reset()
     }
+    // Check if the current item was already clicked in data that
+    // was loaded when loading previous game progress
     if (preClicked[idx]) {
         setAsClicked(getUserKey())
         preClicked[idx] = false
     }
 
+    // Return a clickable button or plain text indicating the
+    // value of current item if the button has been clicked
     if (clicked) { return (<p className="select-container">{text}</p>) }
     else {
         return (<button className="select-container" onClick={handleClick}>{text}</button>)
     }
 }
 
+// Main scoreboard React component
 export function Scoreboard(props) {
     return (
         <table className="scoreboard-container">

@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// This function might just be useless, it is used one time so it can
+// most likely be moved inside that function
 func getReq(c *gin.Context) (startGameRequest, error) {
 	var req startGameRequest
 
@@ -19,6 +21,8 @@ func getReq(c *gin.Context) (startGameRequest, error) {
 	return req, err
 }
 
+// Start a game for given id with given name, loads existing progress
+// and uses that if it exists
 func startGame(c *gin.Context) {
 	id := c.Param("id")
 	name := c.Param("name")
@@ -48,6 +52,7 @@ func startGame(c *gin.Context) {
 	})
 }
 
+// Delete ongoing game data AND saved progress for given id
 func restartGame(c *gin.Context) {
 	req, err := getReq(c)
 	if err != nil {

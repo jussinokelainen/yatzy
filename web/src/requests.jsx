@@ -27,6 +27,7 @@ export async function loadLb(setlb, type) {
   }
 }
 
+// Function to make sending POST requests simpler
 export async function makePOSTrequest(url, body) {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
   await fetch(fullUrl, {
@@ -36,6 +37,7 @@ export async function makePOSTrequest(url, body) {
   });
 }
 
+// Function to make sending GET requests simpler
 export async function makeGETrequest(url) {
   const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
   const response = await fetch(fullUrl, {

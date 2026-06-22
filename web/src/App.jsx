@@ -8,8 +8,11 @@ import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
 
+// Global data to load already clicked items into
+// when loading progress
 export let preClicked = {}
 
+// Map to connect dice with their corresponding image names
 const diceImages = new Map([
   [0, 'dice0'],
   [1, 'dice1'],
@@ -20,6 +23,7 @@ const diceImages = new Map([
   [6, 'dice6'],
 ]);
 
+// Main app function
 const App = () => {
   const [diceState, setDiceState] = useState([0, 0, 0, 0, 0]);
   const [lockState, setLockState] = useState([false, false, false, false, false]);
@@ -31,6 +35,7 @@ const App = () => {
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
 
+  // Start game with either existing progress or a new game
   async function startGame() {
     const hasKey = checkUserKey()
     try {
@@ -39,17 +44,17 @@ const App = () => {
       console.log('Cannot access localStorage:', e);
     }
 
+    // Get game data from server, loads existing progress if it exists,
+    // otherwise a new game is initialized
     const response = await makeGETrequest(`start/${getUserKey()}/${name}`)
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
+    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const progressData = await response.json();
     preClicked = progressData.clickedrow
     setRoundNum(progressData.roundnum)
     setNameIsSet(true)
   }
 
+  // Reset client side game values
   function resetClient() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
@@ -60,16 +65,20 @@ const App = () => {
     setTotal(0)
   }
 
+  // Restart the game
   function restartGame() {
     makePOSTrequest('restart', { id: getUserKey(), name })
     resetClient()
   }
 
+  // Function that is called when the game ends,
+  // this function does not in itself end the game
   async function endGame() {
     const data = await getScores(getUserKey())
     setTotal(data.total)
   }
 
+  // Toggle the locking of a dice
   async function toggleLock(i) {
     if (diceState[i] != 0) {
       await makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
@@ -79,6 +88,7 @@ const App = () => {
     }
   };
 
+  // Function used for visual client side dice rolling effect
   function simulateRollOnce() {
     const newValues = [...diceState]
 
@@ -91,6 +101,8 @@ const App = () => {
     setDiceState(newValues)
   }
 
+  // Function that rolls the dice with visual client side rolling and
+  // then setting the values to ones rolled by the server
   async function rollDice() {
     if (rollCount >= 3) {
       return;
@@ -116,6 +128,8 @@ const App = () => {
     setRollCount(prevCount => prevCount + 1);
   };
 
+  // Function that handles resetting client side game state
+  // after selecting an item
   function handleReset() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
@@ -123,10 +137,13 @@ const App = () => {
     setRoundNum(roundNum + 1)
   }
 
+  // Why does this function exist
   function RollsLeft() {
     return 3 - rollCount
   }
 
+  // Function to load leaderboard data and set the width
+  // to match the type of leaderboard that gets shown
   function showLeaderBoard(type) {
     if (type === 'id') {
       showTotalGames = true
@@ -134,8 +151,8 @@ const App = () => {
     } else {
       showTotalGames = false
       LBWIDTH = 3
-
     }
+
     loadLb(setLbScores, type)
     setNameIsSet(true)
     setShowLb(true)
@@ -183,6 +200,7 @@ const App = () => {
     )
   }
 
+  // Show the leaderboard
   if (showLb) {
     return (
       <div>

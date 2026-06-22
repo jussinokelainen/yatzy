@@ -35,6 +35,7 @@ func formDiceArray(values pq.Int32Array, locked pq.BoolArray) [5]DiceData {
 	return data
 }
 
+// Initializes data for a new game
 func InitUser(id string, name string) {
 	progress := loadProgress(id)
 	var newUser GameData
@@ -75,6 +76,7 @@ func InitUser(id string, name string) {
 	updateCurrentGame(id, newUser)
 }
 
+// Loads data of ongoing game and returns it as the http response
 func sendScoresByID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -90,9 +92,12 @@ func sendScoresByID(c *gin.Context) {
 	})
 }
 
+// Switch function used to calculate the correct value
+// for a selected item, so each 15 items dont need their own
+// http request functions
 func itemSelector(c *gin.Context) {
-	what := c.Param("what")
-	whatInt := 0
+	item := c.Param("what")
+	itemInt := 0
 	var req idStruct
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -100,66 +105,71 @@ func itemSelector(c *gin.Context) {
 		return
 	}
 
+	// value that will be set to the calculated value
+	// in the switch case
 	val := 0
 
-	switch what {
+	switch item {
 	case "one":
 		val = calculateNumbers(req.Id, 1)
-		whatInt = 0
+		itemInt = 0
 	case "two":
 		val = calculateNumbers(req.Id, 2)
-		whatInt = 1
+		itemInt = 1
 	case "three":
 		val = calculateNumbers(req.Id, 3)
-		whatInt = 2
+		itemInt = 2
 	case "four":
 		val = calculateNumbers(req.Id, 4)
-		whatInt = 3
+		itemInt = 3
 	case "five":
 		val = calculateNumbers(req.Id, 5)
-		whatInt = 4
+		itemInt = 4
 	case "six":
 		val = calculateNumbers(req.Id, 6)
-		whatInt = 5
+		itemInt = 5
 	case "pair":
 		val = calculatePair(req.Id)
-		whatInt = 6
+		itemInt = 6
 	case "doublepair":
 		val = calculateDoublepair(req.Id)
-		whatInt = 7
+		itemInt = 7
 	case "triples":
 		val = calculateTriples(req.Id)
-		whatInt = 8
+		itemInt = 8
 	case "quadruples":
 		val = calculateQuadruples(req.Id)
-		whatInt = 9
+		itemInt = 9
 	case "smallstraight":
 		val = calculateSmallstraight(req.Id)
-		whatInt = 10
+		itemInt = 10
 	case "bigstraight":
 		val = calculateBigstraight(req.Id)
-		whatInt = 11
+		itemInt = 11
 	case "fullhouse":
 		val = calculateFullhouse(req.Id)
-		whatInt = 12
+		itemInt = 12
 	case "mixed":
 		val = calculateMixed(req.Id)
-		whatInt = 13
+		itemInt = 13
 	case "quintuples":
 		val = calculateQuintuples(req.Id)
-		whatInt = 14
+		itemInt = 14
 	}
 
 	currentGame := loadCurrentGame(req.Id)
-	currentGame.scorearray[whatInt] = val
-	currentGame.clickedarray[whatInt] = true
+	currentGame.scorearray[itemInt] = val
+	currentGame.clickedarray[itemInt] = true
 	currentGame.turnCount += 1
+
+	// Check if the game is over
 	if currentGame.turnCount >= MAX_ROUND {
 		info("max round, game over")
 		total, _ := calculateTotal(req.Id)
 		row := getScoreRow(req.Id)
 		err = addScore(currentGame.name, total, req.Id, row)
 	}
+
 	var progress progressData
 	progress.Name = currentGame.name
 	progress.Id = req.Id
@@ -171,6 +181,8 @@ func itemSelector(c *gin.Context) {
 	resetDice(req.Id)
 }
 
+// Function to calculate the total and subtotal for given id
+// returns (total, subTotal)
 func calculateTotal(id string) (int, int) {
 	currentGame := loadCurrentGame(id)
 	scoreRow := currentGame.scorearray
@@ -192,6 +204,8 @@ func calculateTotal(id string) (int, int) {
 	return total, subTotal
 }
 
+// Returns the contents of an ongoing game's clicked item boolean
+// values as true/false strings joined as one string separated by ';'
 func getClickedRow(id string) string {
 	currentGame := loadCurrentGame(id)
 	clickedRow := currentGame.clickedarray
@@ -205,6 +219,8 @@ func getClickedRow(id string) string {
 	return row
 }
 
+// Returns the contents of an ongoing game's score row integer
+// values as strings joined as one string separated by ';'
 func getScoreRow(id string) string {
 	currentGame := loadCurrentGame(id)
 	scoreRow := currentGame.scorearray

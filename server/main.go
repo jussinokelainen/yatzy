@@ -23,6 +23,7 @@ var (
 	dbname   = os.Getenv("DATABASE_NAME")
 )
 
+// Print helper functions
 func ok(msg any)     { fmt.Println("[\033[32m OK \033[0m] ", fmt.Sprint(msg)) }
 func info(msg any)   { fmt.Println("[\033[35m INFO \033[0m] ", fmt.Sprint(msg)) }
 func errout(msg any) { fmt.Println("[\033[31m ERROR \033[0m] ", fmt.Sprint(msg)) }
@@ -43,6 +44,7 @@ func openDatabase() *sql.DB {
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
+	// Force color to get nicer looking log messages
 	gin.ForceConsoleColor()
 	db = openDatabase()
 	defer db.Close()
@@ -66,16 +68,20 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// This might be useless or idk,
+	// maybe make all requests be part of some group
 	api := router.Group("/api")
 	{
 		api.GET("/getscores", getTopScores)
 		api.GET("/getstats", getStatsById)
 	}
 
+	// POST requests
 	router.POST("/restart", restartGame)
 	router.POST("/lockDice/:dice", lockDice)
 	router.POST("/selectItem/:what", itemSelector)
 
+	// GET requests
 	router.GET("/start/:id/:name", startGame)
 	router.GET("/rollDice/:id", rollDice)
 	router.GET("/getScoresByID/:id", sendScoresByID)

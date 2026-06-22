@@ -8,11 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Rolls the dice for given id, returns them to the caller as JSON
 func rollDice(c *gin.Context) {
 	id := c.Param("id")
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
 
+	// Generate new values for all dice
 	for i := range dicearr {
 		newVal := rand.IntN(6) + 1
 		if !dicearr[i].locked {
@@ -20,6 +22,8 @@ func rollDice(c *gin.Context) {
 		}
 	}
 
+	// Update database to have current dice values,
+	// and return them as the response to the http request
 	updateCurrentGame(id, currentGame)
 	var values [5]int
 	for i := range dicearr {
@@ -32,6 +36,7 @@ func rollDice(c *gin.Context) {
 	})
 }
 
+// Locks dice given as c.Param for id given in request context
 func lockDice(c *gin.Context) {
 	diceStr := c.Param("dice")
 	dice, err := strconv.Atoi(diceStr)
@@ -54,6 +59,7 @@ func lockDice(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, "Lock status updated")
 }
 
+// Reset dice to unlocked and 0 for given id
 func resetDice(id string) {
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
