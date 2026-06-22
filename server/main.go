@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"time"
 
@@ -24,12 +26,13 @@ var (
 )
 
 // Print helper functions
-func ok(msg any)     { fmt.Println("[\033[32m OK \033[0m] ", fmt.Sprint(msg)) }
-func info(msg any)   { fmt.Println("[\033[35m INFO \033[0m] ", fmt.Sprint(msg)) }
-func errout(msg any) { fmt.Println("[\033[31m ERROR \033[0m] ", fmt.Sprint(msg)) }
+func ok(msg ...any)     { log.Println(append([]any{"[\033[32m OK \033[0m]"}, msg...)...) }
+func info(msg ...any)   { log.Println(append([]any{"[\033[35m INFO \033[0m]"}, msg...)...) }
+func errout(msg ...any) { log.Println(append([]any{"[\033[31m ERROR \033[0m]"}, msg...)...) }
 
 // Function to open a connection to the database
 func openDatabase() *sql.DB {
+	info("openDatabase start")
 	psqlInfo := fmt.Sprintf("host=db port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		port, user, password, dbname)
@@ -39,10 +42,26 @@ func openDatabase() *sql.DB {
 		errout(err)
 	}
 
+	info("openDatabase end")
 	return db
 }
 
 func main() {
+	info("main start")
+	// Setup logging
+	timeNow := time.Now().Format("2006-01-02_15-04-05")
+	logFileName := "/logs/" + timeNow + ".log"
+	logFile, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+	mw := io.MultiWriter(os.Stdout, logFile)
+
+	log.SetOutput(mw)
+
+	gin.DefaultWriter = mw
+	gin.DefaultErrorWriter = mw
 	gin.SetMode(gin.ReleaseMode)
 	// Force color to get nicer looking log messages
 	gin.ForceConsoleColor()
@@ -50,6 +69,14 @@ func main() {
 	defer db.Close()
 
 	router := gin.Default()
+
+	router.Use(func(c *gin.Context) {
+		c.Next()
+
+		if c.Writer.Written() {
+			info("STATUS WRITTEN:", c.Writer.Status(), c.FullPath())
+		}
+	})
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
@@ -84,10 +111,11 @@ func main() {
 	// GET requests
 	router.GET("/start/:id/:name", startGame)
 	router.GET("/rollDice/:id", rollDice)
-	router.GET("/getScoresByID/:id", sendScoresByID)
+	router.GET("/getScoresByID/:id", getScoresByID)
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
 
 	info("Server running...")
 	router.Run("0.0.0.0:2222")
+	info("main end")
 }

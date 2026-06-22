@@ -15,6 +15,7 @@ services:
 
   web:
     build: .
+    platform: linux/arm64
     depends_on:
       - db
     ports:
@@ -23,6 +24,8 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - ./logs:/logs
 
 
 volumes:
