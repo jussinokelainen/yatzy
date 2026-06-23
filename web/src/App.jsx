@@ -1,6 +1,6 @@
 import './App.css'
 import { Button, Button2 } from './buttons'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
 import { Scoreboard, getScores } from './scoreboard'
 import { getUserKey, createUserKey, checkUserKey } from './userkeys'
@@ -40,8 +40,40 @@ const App = () => {
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
 
+  // Function to check whether a player has existing progress stored
+  // in the database. returns [<bool>, <name>] where <bool> is whether
+  // progress exists, and <name> is the name saved with the progress.
+  // If the bool is false, <name> might be undefined
+  async function checkProgressPreGame() {
+    const response = await makeGETrequest(`checkExistingProgress/${getUserKey()}`)
+    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
+    const progress = await response.json();
+    if (progress.exists) {
+      setName(progress.name)
+    }
+    return [progress.exists, progress.name]
+  }
+
+  // useEffect that gets ran once when the website is first opened
+  // if i understand correctly
+  useEffect(() => {
+    async function load() {
+      const check = await checkProgressPreGame()
+      if (check[0]) {
+        startGame(check[1])
+      } else {
+        setGameState(STATE.askName)
+      }
+    }
+
+    load()
+  }, [])
+
   // Start game with either existing progress or a new game
-  async function startGame() {
+  async function startGame(newName) {
+    if (newName == '') {
+      return
+    }
     const hasKey = checkUserKey()
     try {
       hasKey ? null : createUserKey()
@@ -51,7 +83,7 @@ const App = () => {
 
     // Get game data from server, loads existing progress if it exists,
     // otherwise a new game is initialized
-    const response = await makeGETrequest(`start/${getUserKey()}/${name}`)
+    const response = await makeGETrequest(`start/${getUserKey()}/${newName}`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const progressData = await response.json();
     preClicked = progressData.clickedrow
@@ -189,7 +221,7 @@ const App = () => {
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <Button handleClick={startGame} text="Start game" className="gameover-buttons" />
+                  <Button handleClick={startGame(name)} text="Start game" className="gameover-buttons" />
                 </td>
               </tr>
               <tr>

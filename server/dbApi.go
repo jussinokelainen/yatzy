@@ -15,6 +15,20 @@ func getRound(c *gin.Context) {
 	})
 }
 
+func checkExistingProgress(c *gin.Context) {
+	exists := true
+	id := c.Param("id")
+	progress, err := loadProgress(id)
+	if err != nil {
+		exists = false
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"name":   progress.Name,
+		"exists": exists,
+	})
+
+}
+
 // Adds a new ongoing game to the database, or edits and existing one
 // if there is one with given id
 func updateCurrentGame(id string, data GameData) error {
@@ -142,6 +156,8 @@ func saveProgress(progress progressData) error {
 }
 
 // Load progress of player with given id
+// returns an error if no progress exists or there was an
+// error retrieving it
 func loadProgress(id string) (progressData, error) {
 	var data progressData
 

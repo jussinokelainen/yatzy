@@ -107,6 +107,7 @@ func main() {
 
 	// GET requests
 	router.GET("/getRoundNumber/:id", getRound)
+	router.GET("/checkExistingProgress/:id", checkExistingProgress)
 	router.GET("/start/:id/:name", startGame)
 	router.GET("/rollDice/:id", rollDice)
 	router.GET("/getScoresByID/:id", getScoresByID)
