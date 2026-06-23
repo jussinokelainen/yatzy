@@ -7,6 +7,14 @@ import (
 	"github.com/lib/pq"
 )
 
+func getRound(c *gin.Context) {
+	id := c.Param("id")
+	currentGame := loadCurrentGame(id)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"roundnumber": currentGame.roundNum,
+	})
+}
+
 // Adds a new ongoing game to the database, or edits and existing one
 // if there is one with given id
 func updateCurrentGame(id string, data GameData) error {
@@ -40,7 +48,7 @@ func updateCurrentGame(id string, data GameData) error {
 		pq.Array(data.clickedarray),
 		pq.Array(dicevalues),
 		pq.Array(dicelocked),
-		data.turnCount,
+		data.roundNum,
 	)
 	if err != nil {
 		errout("Error updating current game values")
@@ -78,7 +86,7 @@ func loadCurrentGame(id string) GameData {
 		&pq_clickedarray,
 		&dicevalues,
 		&dicelocked,
-		&data.turnCount,
+		&data.roundNum,
 	)
 
 	if err != nil {

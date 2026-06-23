@@ -7,6 +7,14 @@ import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
 
+const MAXROUND = 15
+const STATE = {
+  askName: 0,
+  showLeaderBoard: 1,
+  mainGameUI: 2,
+  endScreen: 3
+}
+
 // Global data to load already clicked items into
 // when loading progress
 export let preClicked = {}
@@ -24,12 +32,10 @@ const diceImages = new Map([
 
 // Main app function
 const App = () => {
+  const [gameState, setGameState] = useState(STATE.askName)
   const [diceState, setDiceState] = useState([0, 0, 0, 0, 0]);
   const [lockState, setLockState] = useState([false, false, false, false, false]);
   const [name, setName] = useState('');
-  const [nameIsSet, setNameIsSet] = useState(false);
-  const [roundNum, setRoundNum] = useState(0);
-  const [showLb, setShowLb] = useState(false);
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
@@ -49,19 +55,16 @@ const App = () => {
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const progressData = await response.json();
     preClicked = progressData.clickedrow
-    setRoundNum(progressData.roundnum)
-    setNameIsSet(true)
+    setGameState(STATE.mainGameUI)
   }
 
   // Reset client side game values
   function resetClient() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
-    setNameIsSet(false)
-    setRoundNum(0)
-    setShowLb(false)
     setRollCount(0)
     setTotal(0)
+    setGameState(STATE.askName)
   }
 
   // Restart the game
@@ -129,11 +132,17 @@ const App = () => {
 
   // Function that handles resetting client side game state
   // after selecting an item
-  function handleReset() {
+  async function handleReset() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
-    setRoundNum(roundNum + 1)
+    const response = await makeGETrequest(`getRoundNumber/${getUserKey()}`)
+    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
+    const roundNum = await response.json();
+    if (roundNum.roundnumber >= MAXROUND) {
+      endGame();
+      setGameState(STATE.endScreen)
+    }
   }
 
   // Why does this function exist
@@ -153,163 +162,164 @@ const App = () => {
     }
 
     loadLb(setLbScores, type)
-    setNameIsSet(true)
-    setShowLb(true)
+    setGameState(STATE.showLeaderBoard)
   }
 
-  // Ask for name before game starts
-  if (!nameIsSet) {
-    return (
-      <div className="gameover-table">
-        <table className="gameover-table">
-          <tbody>
-            <tr>
-              <td className="gameover-table">
-                <p className="gameover-text">Enter your name</p>
-              </td>
-            </tr>
-            <tr>
-              <td className="gameover-table">
-                <input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="nameinput-box"
-                  onFocus={() => { setName('') }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="gameover-table">
-                <Button handleClick={startGame} text="Start game" className="gameover-buttons" />
-              </td>
-            </tr>
-            <tr>
-              <td className="gameover-table">
-                <Button handleClick={() => showLeaderBoard('name')} text="Top 20 results" className="gameover-buttons" />
-              </td>
-            </tr>
-            <tr>
-              <td className="gameover-table">
-                <Button handleClick={() => showLeaderBoard('id')} text="Leaderboard by id" className="gameover-buttons" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    )
-  }
-
-  // Show the leaderboard
-  if (showLb) {
-    return (
-      <div>
-        <table className="leaderboard-screen">
-          <tbody>
-            <tr>
-              <th colSpan={LBWIDTH} className="leaderboard-screen">
-                <p className="gameover-text">Leaderboard</p>
-              </th>
-            </tr>
-            <tr>
-              <td className="leaderboard-table">
-                <p>Place</p>
-              </td>
-              <td className="leaderboard-table">
-                <p>Name</p>
-              </td>
-              <td className="leaderboard-table">
-                <p>Score</p>
-              </td>
-              {showTotalGames ?
+  switch (gameState) {
+    case STATE.askName:
+      // Ask for name from user
+      return (
+        <div className="gameover-table">
+          <table className="gameover-table">
+            <tbody>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Enter your name</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <input
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="nameinput-box"
+                    onFocus={() => { setName('') }}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={startGame} text="Start game" className="gameover-buttons" />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={() => showLeaderBoard('name')} text="Top 20 results" className="gameover-buttons" />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={() => showLeaderBoard('id')} text="Leaderboard by id" className="gameover-buttons" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
+    case STATE.showLeaderBoard:
+      // Show the leaderboard
+      return (
+        <div>
+          <table className="leaderboard-screen">
+            <tbody>
+              <tr>
+                <th colSpan={LBWIDTH} className="leaderboard-screen">
+                  <p className="gameover-text">Leaderboard</p>
+                </th>
+              </tr>
+              <tr>
                 <td className="leaderboard-table">
-                  <p>Games</p>
-                </td> : null
-              }
-            </tr>
-            {lbScores.map((score, index) => (
-              <tr key={index}>
-                <td className="leaderboard-table">{index + 1}.</td>
-                <td className="leaderboard-table">{score.name}</td>
-                <td className="leaderboard-table">{score.score}</td>
+                  <p>Place</p>
+                </td>
+                <td className="leaderboard-table">
+                  <p>Name</p>
+                </td>
+                <td className="leaderboard-table">
+                  <p>Score</p>
+                </td>
                 {showTotalGames ?
                   <td className="leaderboard-table">
-                    {score.count}
+                    <p>Games</p>
                   </td> : null
                 }
               </tr>
-            ))}
-            <tr>
-              <td colSpan={LBWIDTH} className="leaderboard-screen">
-                <Button handleClick={resetClient} text='Back' className="gameover-buttons" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    )
+              {lbScores.map((score, index) => (
+                <tr key={index}>
+                  <td className="leaderboard-table">{index + 1}.</td>
+                  <td className="leaderboard-table">{score.name}</td>
+                  <td className="leaderboard-table">{score.score}</td>
+                  {showTotalGames ?
+                    <td className="leaderboard-table">
+                      {score.count}
+                    </td> : null
+                  }
+                </tr>
+              ))}
+              <tr>
+                <td colSpan={LBWIDTH} className="leaderboard-screen">
+                  <Button handleClick={resetClient} text='Back' className="gameover-buttons" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
+    case STATE.mainGameUI:
+      // Main game ui
+      return (
+        <div>
+          <table className="scoreboard-table">
+            <tbody>
+              <tr>
+                <td className="scoreboard-table">
+                  <Scoreboard
+                    values={diceState}
+                    reset={handleReset}
+                    name={name}
+                  />
+
+                  <Button handleClick={restartGame} text='Restart game' className="restart-container" />
+                </td>
+                <td className="scoreboard-table">
+                  <p className="gameover-text"><RollsLeft /></p>
+                  <Button handleClick={rollDice} text='Roll' className="rollbtn-container" />
+
+                  {Array.from(diceState.entries()).map(([i, value]) => (
+                    <div className='dice-container' key={i}>
+                      {<Button2 handleClick={() => toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
+                      <div className={lockState[i] ? 'locked' : null} />
+                    </div>
+                  ))}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      );
+    case STATE.endScreen:
+      // End of game screen
+      return (
+        <div>
+          <table className="gameover-table">
+            <tbody>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Game Over!</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Final score: {total}</p>
+                </td>
+              </tr>
+              <tr>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={restartGame} text='Main menu' className="gameover-buttons" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
+    default:
+      return (
+        <div>
+          <p>Unexpected game state.</p>
+        </div>
+      )
   }
-
-  // Main game ui
-  if (roundNum < 15) {
-    return (
-      <div>
-        <table className="scoreboard-table">
-          <tbody>
-            <tr>
-              <td className="scoreboard-table">
-                <Scoreboard
-                  values={diceState}
-                  reset={handleReset}
-                  name={name}
-                />
-
-                <Button handleClick={restartGame} text='Restart game' className="restart-container" />
-              </td>
-              <td className="scoreboard-table">
-                <p className="gameover-text"><RollsLeft /></p>
-                <Button handleClick={rollDice} text='Roll' className="rollbtn-container" />
-
-                {Array.from(diceState.entries()).map(([i, value]) => (
-                  <div className='dice-container' key={i}>
-                    {<Button2 handleClick={() => toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
-                    <div className={lockState[i] ? 'locked' : null} />
-                  </div>
-                ))}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
-  // End of game screen
-  endGame();
-  return (
-    <div>
-      <table className="gameover-table">
-        <tbody>
-          <tr>
-            <td className="gameover-table">
-              <p className="gameover-text">Game Over!</p>
-            </td>
-          </tr>
-          <tr>
-            <td className="gameover-table">
-              <p className="gameover-text">Final score: {total}</p>
-            </td>
-          </tr>
-          <tr>
-          </tr>
-          <tr>
-            <td className="gameover-table">
-              <Button handleClick={restartGame} text='Main menu' className="gameover-buttons" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  )
 }
 
 export default App

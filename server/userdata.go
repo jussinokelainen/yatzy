@@ -58,7 +58,7 @@ func InitUser(id string, name string) progressData {
 		newUser.name = progress.Name
 	}
 
-	newUser.turnCount = progress.Roundnum
+	newUser.roundNum = progress.Roundnum
 
 	// This has to be changed when dice values also get
 	// loaded from progress
@@ -155,7 +155,7 @@ func itemSelector(c *gin.Context) {
 	currentGame := loadCurrentGame(req.Id)
 	currentGame.scorearray[itemInt] = val
 	currentGame.clickedarray[itemInt] = true
-	currentGame.turnCount += 1
+	currentGame.roundNum += 1
 	updateCurrentGame(req.Id, currentGame)
 
 	var progress progressData
@@ -163,12 +163,12 @@ func itemSelector(c *gin.Context) {
 	progress.Id = req.Id
 	progress.Scorerow = getScoreRow(req.Id)
 	progress.Clicked = getClickedRow(req.Id)
-	progress.Roundnum = currentGame.turnCount
+	progress.Roundnum = currentGame.roundNum
 	saveProgress(progress)
 	resetDice(req.Id)
 
 	// Check if the game is over
-	if currentGame.turnCount >= MAX_ROUND {
+	if currentGame.roundNum >= MAX_ROUND {
 		total, _ := calculateTotal(req.Id)
 		row := getScoreRow(req.Id)
 		info("Saving:", currentGame.name, total, row)
