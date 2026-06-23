@@ -134,7 +134,7 @@ func saveProgress(progress progressData) error {
 }
 
 // Load progress of player with given id
-func loadProgress(id string) progressData {
+func loadProgress(id string) (progressData, error) {
 	var data progressData
 
 	sqlStatement := `
@@ -163,7 +163,7 @@ func loadProgress(id string) progressData {
 		errout(err)
 	}
 
-	return data
+	return data, err
 }
 
 // Delete progress of player with given id

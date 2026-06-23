@@ -36,44 +36,39 @@ func formDiceArray(values pq.Int32Array, locked pq.BoolArray) [5]DiceData {
 }
 
 // Initializes data for a new game
-func InitUser(id string, name string) {
-	progress := loadProgress(id)
+func InitUser(id string, name string) progressData {
 	var newUser GameData
-	if progress.Name != "" {
-		newUser.name = progress.Name
-	} else {
+	progress, err := loadProgress(id)
+	if err != nil {
+		// No progress loaded, init from 0
 		newUser.name = name
+		for i := range 15 {
+			newUser.clickedarray[i] = false
+			newUser.scorearray[i] = 0
+		}
+	} else {
+		// Existing progress loaded
+		parsedClicks := strings.Split(progress.Clicked, ";")
+		parsedScores := strings.Split(progress.Scorerow, ";")
+		for i := range 15 {
+			newUser.clickedarray[i], _ = strconv.ParseBool(parsedClicks[i])
+			parsedVal, _ := strconv.ParseInt(parsedScores[i], 10, 0)
+			newUser.scorearray[i] = int(parsedVal)
+		}
+		newUser.name = progress.Name
 	}
+
 	newUser.turnCount = progress.Roundnum
+
+	// This has to be changed when dice values also get
+	// loaded from progress
 	for i := range newUser.diceArray {
 		newUser.diceArray[i].value = 0
 		newUser.diceArray[i].locked = false
 	}
 
-	parsedClicks := strings.Split(progress.Clicked, ";")
-	if len(parsedClicks) == len(newUser.clickedarray) {
-		for i := range newUser.clickedarray {
-			newUser.clickedarray[i], _ = strconv.ParseBool(parsedClicks[i])
-		}
-	} else {
-		for i := range newUser.clickedarray {
-			newUser.clickedarray[i] = false
-		}
-	}
-
-	parsedScores := strings.Split(progress.Scorerow, ";")
-	if len(parsedScores) == len(newUser.scorearray) {
-		for i := range newUser.scorearray {
-			parsedVal, _ := strconv.ParseInt(parsedScores[i], 10, 0)
-			newUser.scorearray[i] = int(parsedVal)
-		}
-	} else {
-		for i := range newUser.scorearray {
-			newUser.scorearray[i] = 0
-		}
-	}
-
 	updateCurrentGame(id, newUser)
+	return progress
 }
 
 // Loads data of ongoing game and returns it as the http response
@@ -161,6 +156,7 @@ func itemSelector(c *gin.Context) {
 	currentGame.scorearray[itemInt] = val
 	currentGame.clickedarray[itemInt] = true
 	currentGame.turnCount += 1
+	updateCurrentGame(req.Id, currentGame)
 
 	var progress progressData
 	progress.Name = currentGame.name
@@ -168,7 +164,6 @@ func itemSelector(c *gin.Context) {
 	progress.Scorerow = getScoreRow(req.Id)
 	progress.Clicked = getClickedRow(req.Id)
 	progress.Roundnum = currentGame.turnCount
-	updateCurrentGame(req.Id, currentGame)
 	saveProgress(progress)
 	resetDice(req.Id)
 

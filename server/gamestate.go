@@ -27,8 +27,7 @@ func startGame(c *gin.Context) {
 	id := c.Param("id")
 	name := c.Param("name")
 
-	InitUser(id, name)
-	progress := loadProgress(id)
+	progress := InitUser(id, name)
 
 	var parsedClickRow [15]bool
 	parsedClickstrings := strings.Split(progress.Clicked, ";")
