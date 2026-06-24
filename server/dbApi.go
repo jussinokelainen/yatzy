@@ -7,28 +7,6 @@ import (
 	"github.com/lib/pq"
 )
 
-func getRound(c *gin.Context) {
-	id := c.Param("id")
-	currentGame := loadCurrentGame(id)
-	c.IndentedJSON(http.StatusOK, gin.H{
-		"roundnumber": currentGame.roundNum,
-	})
-}
-
-func checkExistingProgress(c *gin.Context) {
-	exists := true
-	id := c.Param("id")
-	progress, err := loadProgress(id)
-	if err != nil {
-		exists = false
-	}
-	c.IndentedJSON(http.StatusOK, gin.H{
-		"name":   progress.Name,
-		"exists": exists,
-	})
-
-}
-
 // Adds a new ongoing game to the database, or edits and existing one
 // if there is one with given id
 func updateCurrentGame(id string, data GameData) error {
