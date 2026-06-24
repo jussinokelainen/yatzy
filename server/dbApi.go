@@ -106,6 +106,7 @@ func loadCurrentGame(id string) GameData {
 	if err != nil {
 		errout("Error loading current game values")
 		errout(err)
+		return data
 	}
 
 	tmp_scorearray := []int32(pq_scorearray)

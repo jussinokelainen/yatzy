@@ -71,9 +71,13 @@ const App = () => {
 
   // Start game with either existing progress or a new game
   async function startGame(newName) {
-    if (newName == '') {
-      return
-    }
+    // Game already runnińg, nothing to do
+    if (gameState == STATE.mainGameUI) { return }
+
+    // No name is given, do not start the game
+    if (newName == '') { return }
+
+    // Start a new game
     const hasKey = checkUserKey()
     try {
       hasKey ? null : createUserKey()
@@ -221,7 +225,7 @@ const App = () => {
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <Button handleClick={startGame(name)} text="Start game" className="gameover-buttons" />
+                  <Button handleClick={() => startGame(name)} text="Start game" className="gameover-buttons" />
                 </td>
               </tr>
               <tr>
