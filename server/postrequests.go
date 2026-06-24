@@ -124,8 +124,10 @@ func itemSelector(c *gin.Context) {
 	progress.Clicked = getClickedRow(req.Id)
 	progress.Roundnum = currentGame.roundNum
 	saveProgress(progress)
-	resetDice(req.Id)
 
+	info(item, "value calculated as", val, "from", currentGame.diceArray)
+
+	resetDice(req.Id)
 	// Check if the game is over
 	if currentGame.roundNum >= MAX_ROUND {
 		total, _ := calculateTotal(req.Id)

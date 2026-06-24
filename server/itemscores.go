@@ -2,6 +2,8 @@ package main
 
 import "sort"
 
+// Function that returns the values of the dice
+// for given player as a sorted array
 func getDiceValuesArray(id string) [5]int {
 	var valuesArray [5]int
 	currentGame := loadCurrentGame(id)
@@ -13,6 +15,8 @@ func getDiceValuesArray(id string) [5]int {
 	return valuesArray
 }
 
+// Function that calculates how many times each number
+// appeared in the given array
 func getFrequencyMap(arr [5]int) map[int]int {
 	freqMap := map[int]int{}
 	for _, i := range arr {
@@ -21,6 +25,8 @@ func getFrequencyMap(arr [5]int) map[int]int {
 	return freqMap
 }
 
+// Calculates the sum for all numbers given as val from player
+// with given id
 func calculateNumbers(id string, val int) int {
 	dicearr := getDiceValuesArray(id)
 	sum := 0
