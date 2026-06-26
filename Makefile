@@ -43,6 +43,7 @@ clean:
 	@rm -rf ./logs/
 	@rm -rf ./web/node_modules/
 	@rm -rf ./web/dist/
+	@rm -rf ./bin/
 	@printf "\r\e[0K"
 	@echo
 	@printf "[\e[32m OK \e[0m] Cleaning done\n"

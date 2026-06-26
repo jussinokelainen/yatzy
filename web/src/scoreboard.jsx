@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { makePOSTrequest, makeGETrequest } from "./requests";
 import { getUserKey } from "./userkeys";
-import { preClicked } from "./App";
+import { preClicked, rollCount_global } from "./App";
 
 let total = 0
 let subTotal = 0
@@ -46,10 +46,12 @@ function SelectButton({ position, reset, idx }) {
         setClicked(true)
     }
     async function handleClick() {
-        const id = getUserKey()
-        await makePOSTrequest(`selectItem/${position}`, { id: id })
-        await setAsClicked(id)
-        reset()
+        if (rollCount_global != 0) {
+            const id = getUserKey()
+            await makePOSTrequest(`selectItem/${position}`, { id: id })
+            await setAsClicked(id)
+            reset()
+        }
     }
     // Check if the current item was already clicked in data that
     // was loaded when loading previous game progress

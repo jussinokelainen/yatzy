@@ -16,8 +16,9 @@ const STATE = {
 }
 
 // Global data to load already clicked items into
-// when loading progress
+// when loading progress, and global turn count
 export let preClicked = {}
+export let rollCount_global = 0
 
 // Map to connect dice with their corresponding image names
 const diceImages = new Map([
@@ -99,6 +100,7 @@ const App = () => {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
+    rollCount_global = 0
     setTotal(0)
     setGameState(STATE.askName)
   }
@@ -164,6 +166,7 @@ const App = () => {
     }, 1100)
 
     setRollCount(prevCount => prevCount + 1);
+    rollCount_global = prevCount => prevCount + 1
   };
 
   // Function that handles resetting client side game state
@@ -172,6 +175,7 @@ const App = () => {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
+    rollCount_global = 0
     const response = await makeGETrequest(`getRoundNumber/${getUserKey()}`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const roundNum = await response.json();
