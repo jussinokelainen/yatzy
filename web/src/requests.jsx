@@ -1,5 +1,3 @@
-export const PORT = 2222; // Go server port
-
 // Load leaderboard
 export async function loadLb(setlb, type) {
   let apiUrl = ``;
@@ -29,7 +27,7 @@ export async function loadLb(setlb, type) {
 
 // Function to make sending POST requests simpler
 export async function makePOSTrequest(url, body) {
-  const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
+  const fullUrl = `/${url}`;
   await fetch(fullUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -39,7 +37,7 @@ export async function makePOSTrequest(url, body) {
 
 // Function to make sending GET requests simpler
 export async function makeGETrequest(url) {
-  const fullUrl = `${window.location.protocol}//${window.location.hostname}:${PORT}/${url}`;
+  const fullUrl = `/${url}`;
   const response = await fetch(fullUrl, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
