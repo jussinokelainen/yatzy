@@ -34,13 +34,21 @@ export async function getScores() {
     return data
 }
 
+type SelectButtonProps = {
+    position: any;
+    reset: Function;
+    idx: number;
+}
 // React component used for the button/number of all items in the scoreboard
-function SelectButton({ position, reset, idx }) {
+function SelectButton({ position, reset, idx }: SelectButtonProps) {
     const [clicked, setClicked] = useState(false)
     const [text, setText] = useState('select')
-    async function setAsClicked(id) {
-        const data = await getScores(id)
-        setText(data.scores[indexTextToInt.get(position)])
+    async function setAsClicked() {
+        const data = await getScores()
+        const data_index = indexTextToInt.get(position)
+        if (data_index !== undefined) {
+            setText(data.scores[data_index])
+        }
         total = data.total
         subTotal = data.subTotal
         setClicked(true)
@@ -49,14 +57,14 @@ function SelectButton({ position, reset, idx }) {
         if (rollCount_global != 0) {
             const id = getUserKey()
             await makePOSTrequest(`selectItem/${position}`, { id: id })
-            await setAsClicked(id)
+            await setAsClicked()
             reset()
         }
     }
     // Check if the current item was already clicked in data that
     // was loaded when loading previous game progress
     if (preClicked[idx]) {
-        setAsClicked(getUserKey())
+        setAsClicked()
         preClicked[idx] = false
     }
 
@@ -69,7 +77,7 @@ function SelectButton({ position, reset, idx }) {
 }
 
 // Main scoreboard React component
-export function Scoreboard(props) {
+export function Scoreboard(props: any) {
     return (
         <table className="scoreboard-container">
             <tbody className="scoreboard1-container">

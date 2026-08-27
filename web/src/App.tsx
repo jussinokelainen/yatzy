@@ -17,8 +17,8 @@ const STATE = {
 
 // Global data to load already clicked items into
 // when loading progress, and global turn count
-export let preClicked = {}
-export let rollCount_global = 0
+export let preClicked: Record<number, boolean> = {}
+export let rollCount_global: number = 0
 
 // Map to connect dice with their corresponding image names
 const diceImages = new Map([
@@ -71,7 +71,7 @@ const App = () => {
   }, [])
 
   // Start game with either existing progress or a new game
-  async function startGame(newName) {
+  async function startGame(newName: string) {
     // Game already runnińg, nothing to do
     if (gameState == STATE.mainGameUI) { return }
 
@@ -114,12 +114,12 @@ const App = () => {
   // Function that is called when the game ends,
   // this function does not in itself end the game
   async function endGame() {
-    const data = await getScores(getUserKey())
+    const data = await getScores()
     setTotal(data.total)
   }
 
   // Toggle the locking of a dice
-  async function toggleLock(i) {
+  async function toggleLock(i: number) {
     if (diceState[i] != 0) {
       await makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
       const newLocks = [...lockState]
@@ -166,7 +166,7 @@ const App = () => {
     }, 1100)
 
     setRollCount(prevCount => prevCount + 1);
-    rollCount_global = prevCount => prevCount + 1
+    rollCount_global += 1
   };
 
   // Function that handles resetting client side game state
@@ -192,7 +192,7 @@ const App = () => {
 
   // Function to load leaderboard data and set the width
   // to match the type of leaderboard that gets shown
-  function showLeaderBoard(type) {
+  function showLeaderBoard(type: string) {
     if (type === 'id') {
       showTotalGames = true
       LBWIDTH = 4
@@ -273,7 +273,7 @@ const App = () => {
                   </td> : null
                 }
               </tr>
-              {lbScores.map((score, index) => (
+              {lbScores.map((score: any, index: number) => (
                 <tr key={index}>
                   <td className="leaderboard-table">{index + 1}.</td>
                   <td className="leaderboard-table">{score.name}</td>
@@ -317,7 +317,7 @@ const App = () => {
                   {Array.from(diceState.entries()).map(([i, value]) => (
                     <div className='dice-container' key={i}>
                       {<Button2 handleClick={() => toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
-                      <div className={lockState[i] ? 'locked' : null} />
+                      <div className={lockState[i] ? 'locked' : ''} />
                     </div>
                   ))}
                 </td>

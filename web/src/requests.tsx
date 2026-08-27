@@ -1,5 +1,5 @@
 // Load leaderboard
-export async function loadLb(setlb, type) {
+export async function loadLb(setlb: Function, type: string) {
   let apiUrl = ``;
   if (type === 'name') {
     apiUrl = `api/getscores`
@@ -26,7 +26,7 @@ export async function loadLb(setlb, type) {
 }
 
 // Function to make sending POST requests simpler
-export async function makePOSTrequest(url, body) {
+export async function makePOSTrequest(url: string, body: any) {
   const fullUrl = `/${url}`;
   await fetch(fullUrl, {
     method: 'POST',
@@ -36,7 +36,7 @@ export async function makePOSTrequest(url, body) {
 }
 
 // Function to make sending GET requests simpler
-export async function makeGETrequest(url) {
+export async function makeGETrequest(url: string) {
   const fullUrl = `/${url}`;
   const response = await fetch(fullUrl, {
     method: 'GET',
