@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS results(
 	name  varchar,
 	score integer,
-	id    varchar PRIMARY KEY,
+	id    varchar,
 	row   varchar
 );
 
