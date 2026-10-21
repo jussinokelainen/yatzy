@@ -12,7 +12,7 @@ import (
 // Function that returns the current round the game is on
 // as the response to the request
 func getRound(c *gin.Context) {
-	id := c.Param("id")
+	id := getUserKey(c)
 	currentGame := loadCurrentGame(id)
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"roundnumber": currentGame.roundNum,
@@ -24,7 +24,7 @@ func getRound(c *gin.Context) {
 // If there is no progress, name might return something undefined
 func checkExistingProgress(c *gin.Context) {
 	exists := true
-	id := c.Param("id")
+	id := getUserKey(c)
 	progress, err := loadProgress(id)
 	if err != nil {
 		exists = false
@@ -36,11 +36,16 @@ func checkExistingProgress(c *gin.Context) {
 
 }
 
-// Start a game for given id with given name, loads existing progress
-// and uses that if it exists
+// Start a game for the player of the request with given name,
+// loads existing progress and uses that if it exists
 func startGame(c *gin.Context) {
-	id := c.Param("id")
-	name := c.Param("name")
+	id := getUserKey(c)
+	name := c.Query("name")
+
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
+		return
+	}
 
 	progress := InitUser(id, name)
 
@@ -59,16 +64,15 @@ func startGame(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"name":       progress.Name,
-		"id":         progress.Id,
 		"scorerow":   parsedScoreRow,
 		"clickedrow": parsedClickRow,
 		"roundnum":   progress.Roundnum,
 	})
 }
 
-// Rolls the dice for given id, returns them to the caller as JSON
+// Rolls the dice for the player of the request, returns them to the caller as JSON
 func rollDice(c *gin.Context) {
-	id := c.Param("id")
+	id := getUserKey(c)
 	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
 
@@ -96,7 +100,7 @@ func rollDice(c *gin.Context) {
 
 // Loads data of ongoing game and returns it as the http response
 func getScoresByID(c *gin.Context) {
-	id := c.Param("id")
+	id := getUserKey(c)
 
 	currentGame := loadCurrentGame(id)
 	scoreRow := currentGame.scorearray

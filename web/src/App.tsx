@@ -3,7 +3,6 @@ import { Button, Button2 } from './buttons'
 import { useState, useEffect } from 'react'
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
 import { Scoreboard, getScores } from './scoreboard'
-import { getUserKey, createUserKey, checkUserKey } from './userkeys'
 let showTotalGames = false
 let LBWIDTH = 3
 
@@ -46,7 +45,7 @@ const App = () => {
   // progress exists, and <name> is the name saved with the progress.
   // If the bool is false, <name> might be undefined
   async function checkProgressPreGame() {
-    const response = await makeGETrequest(`checkExistingProgress/${getUserKey()}`)
+    const response = await makeGETrequest(`checkExistingProgress`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const progress = await response.json();
     if (progress.exists) {
@@ -78,17 +77,10 @@ const App = () => {
     // No name is given, do not start the game
     if (newName == '') { return }
 
-    // Start a new game
-    const hasKey = checkUserKey()
-    try {
-      hasKey ? null : createUserKey()
-    } catch (e) {
-      console.log('Cannot access localStorage:', e);
-    }
-
     // Get game data from server, loads existing progress if it exists,
-    // otherwise a new game is initialized
-    const response = await makeGETrequest(`start/${getUserKey()}/${newName}`)
+    // otherwise a new game is initialized. The player is identified by
+    // the cookie the server sets, so no id is needed here.
+    const response = await makeGETrequest(`start?name=${encodeURIComponent(newName)}`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const progressData = await response.json();
     preClicked = progressData.clickedrow
@@ -107,7 +99,7 @@ const App = () => {
 
   // Restart the game
   function restartGame() {
-    makePOSTrequest('restart', { id: getUserKey(), name })
+    makePOSTrequest('restart')
     resetClient()
   }
 
@@ -121,7 +113,7 @@ const App = () => {
   // Toggle the locking of a dice
   async function toggleLock(i: number) {
     if (diceState[i] != 0) {
-      await makePOSTrequest(`lockDice/${i}`, { id: getUserKey() })
+      await makePOSTrequest(`lockDice/${i}`)
       const newLocks = [...lockState]
       newLocks[i] = !newLocks[i]
       setLockState(newLocks)
@@ -148,7 +140,7 @@ const App = () => {
       return;
     }
 
-    const response = await makeGETrequest(`rollDice/${getUserKey()}`)
+    const response = await makeGETrequest(`rollDice`)
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
@@ -176,7 +168,7 @@ const App = () => {
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
     rollCount_global = 0
-    const response = await makeGETrequest(`getRoundNumber/${getUserKey()}`)
+    const response = await makeGETrequest(`getRoundNumber`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const roundNum = await response.json();
     if (roundNum.roundnumber >= MAXROUND) {

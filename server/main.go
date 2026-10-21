@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -75,23 +74,6 @@ func main() {
 	// 	}
 	// })
 
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:5173",
-		},
-		AllowMethods: []string{
-			"GET", "POST",
-		},
-		AllowHeaders: []string{
-			"Origin", "Content-Type", "Authorization",
-		},
-		ExposeHeaders: []string{
-			"Content-Length",
-		},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
 	// This might be useless or idk,
 	// maybe make all requests be part of some group
 	api := router.Group("/api")
@@ -100,17 +82,24 @@ func main() {
 		api.GET("/getstats", getStatsById)
 	}
 
-	// POST requests
-	router.POST("/restart", restartGame)
-	router.POST("/lockDice/:dice", lockDice)
-	router.POST("/selectItem/:what", itemSelector)
+	// Routes that belong to a single player. The player is identified by
+	// an http only cookie instead of the id being part of the url.
+	game := router.Group("/")
+	{
+		game.Use(userKeyMiddleware)
 
-	// GET requests
-	router.GET("/getRoundNumber/:id", getRound)
-	router.GET("/checkExistingProgress/:id", checkExistingProgress)
-	router.GET("/start/:id/:name", startGame)
-	router.GET("/rollDice/:id", rollDice)
-	router.GET("/getScoresByID/:id", getScoresByID)
+		// POST requests
+		game.POST("/restart", restartGame)
+		game.POST("/lockDice/:dice", lockDice)
+		game.POST("/selectItem/:what", itemSelector)
+
+		// GET requests
+		game.GET("/getRoundNumber", getRound)
+		game.GET("/checkExistingProgress", checkExistingProgress)
+		game.GET("/start", startGame)
+		game.GET("/rollDice", rollDice)
+		game.GET("/getScoresByID", getScoresByID)
+	}
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
 

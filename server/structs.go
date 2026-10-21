@@ -33,16 +33,3 @@ type DiceData struct {
 	value  int
 	locked bool
 }
-
-// Struct used to store name for corresponding id when starting a game
-// i guess?
-type startGameRequest struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// Struct used to parse id from http requests
-// This is most likely useless, but its used for now
-type idStruct struct {
-	Id string `json:"id"`
-}

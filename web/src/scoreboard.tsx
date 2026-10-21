@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { makePOSTrequest, makeGETrequest } from "./requests";
-import { getUserKey } from "./userkeys";
 import { preClicked, rollCount_global } from "./App";
 
 let total = 0
@@ -26,7 +25,7 @@ const indexTextToInt = new Map([
 
 // Function to get the score of current client id
 export async function getScores() {
-    const response = await makeGETrequest(`getScoresByID/${getUserKey()}`)
+    const response = await makeGETrequest(`getScoresByID`)
     if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
     }
@@ -55,8 +54,7 @@ function SelectButton({ position, reset, idx }: SelectButtonProps) {
     }
     async function handleClick() {
         if (rollCount_global != 0) {
-            const id = getUserKey()
-            await makePOSTrequest(`selectItem/${position}`, { id: id })
+            await makePOSTrequest(`selectItem/${position}`)
             await setAsClicked()
             reset()
         }

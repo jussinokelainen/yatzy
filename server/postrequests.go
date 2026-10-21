@@ -7,23 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Delete ongoing game data AND saved progress for given id
+// Delete ongoing game data AND saved progress for the player of the request
 func restartGame(c *gin.Context) {
-	var req startGameRequest
+	id := getUserKey(c)
 
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	deleteCurrentGame(req.Id)
-	deleteProgress(req.Id)
+	deleteCurrentGame(id)
+	deleteProgress(id)
 
 	c.IndentedJSON(http.StatusOK, "Game reset")
 }
 
-// Locks dice given as c.Param for id given in request context
+// Locks dice given as c.Param for the player of the request
 func lockDice(c *gin.Context) {
 	diceStr := c.Param("dice")
 	dice, err := strconv.Atoi(diceStr)
@@ -31,17 +25,16 @@ func lockDice(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
-	var req idStruct
-	err = c.ShouldBindJSON(&req)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+	if dice < 0 || dice > 4 {
+		c.JSON(400, gin.H{"error": "No dice with that index"})
 		return
 	}
-	currentGame := loadCurrentGame(req.Id)
+
+	id := getUserKey(c)
+	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray[dice]
 	dicearr.locked = !dicearr.locked
-	updateCurrentGame(req.Id, currentGame)
+	updateCurrentGame(id, currentGame)
 
 	c.IndentedJSON(http.StatusOK, "Lock status updated")
 }
@@ -52,12 +45,7 @@ func lockDice(c *gin.Context) {
 func itemSelector(c *gin.Context) {
 	item := c.Param("what")
 	itemInt := 0
-	var req idStruct
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
+	id := getUserKey(c)
 
 	// value that will be set to the calculated value
 	// in the switch case
@@ -65,75 +53,75 @@ func itemSelector(c *gin.Context) {
 
 	switch item {
 	case "one":
-		val = calculateNumbers(req.Id, 1)
+		val = calculateNumbers(id, 1)
 		itemInt = 0
 	case "two":
-		val = calculateNumbers(req.Id, 2)
+		val = calculateNumbers(id, 2)
 		itemInt = 1
 	case "three":
-		val = calculateNumbers(req.Id, 3)
+		val = calculateNumbers(id, 3)
 		itemInt = 2
 	case "four":
-		val = calculateNumbers(req.Id, 4)
+		val = calculateNumbers(id, 4)
 		itemInt = 3
 	case "five":
-		val = calculateNumbers(req.Id, 5)
+		val = calculateNumbers(id, 5)
 		itemInt = 4
 	case "six":
-		val = calculateNumbers(req.Id, 6)
+		val = calculateNumbers(id, 6)
 		itemInt = 5
 	case "pair":
-		val = calculatePair(req.Id)
+		val = calculatePair(id)
 		itemInt = 6
 	case "doublepair":
-		val = calculateDoublepair(req.Id)
+		val = calculateDoublepair(id)
 		itemInt = 7
 	case "triples":
-		val = calculateTriples(req.Id)
+		val = calculateTriples(id)
 		itemInt = 8
 	case "quadruples":
-		val = calculateQuadruples(req.Id)
+		val = calculateQuadruples(id)
 		itemInt = 9
 	case "smallstraight":
-		val = calculateSmallstraight(req.Id)
+		val = calculateSmallstraight(id)
 		itemInt = 10
 	case "bigstraight":
-		val = calculateBigstraight(req.Id)
+		val = calculateBigstraight(id)
 		itemInt = 11
 	case "fullhouse":
-		val = calculateFullhouse(req.Id)
+		val = calculateFullhouse(id)
 		itemInt = 12
 	case "mixed":
-		val = calculateMixed(req.Id)
+		val = calculateMixed(id)
 		itemInt = 13
 	case "quintuples":
-		val = calculateQuintuples(req.Id)
+		val = calculateQuintuples(id)
 		itemInt = 14
 	}
 
-	currentGame := loadCurrentGame(req.Id)
+	currentGame := loadCurrentGame(id)
 	currentGame.scorearray[itemInt] = val
 	currentGame.clickedarray[itemInt] = true
 	currentGame.roundNum += 1
-	updateCurrentGame(req.Id, currentGame)
+	updateCurrentGame(id, currentGame)
 
 	var progress progressData
 	progress.Name = currentGame.name
-	progress.Id = req.Id
-	progress.Scorerow = getScoreRow(req.Id)
-	progress.Clicked = getClickedRow(req.Id)
+	progress.Id = id
+	progress.Scorerow = getScoreRow(id)
+	progress.Clicked = getClickedRow(id)
 	progress.Roundnum = currentGame.roundNum
 	saveProgress(progress)
 
 	info(item, "value calculated as", val, "from", currentGame.diceArray)
 
-	resetDice(req.Id)
+	resetDice(id)
 	// Check if the game is over
 	if currentGame.roundNum >= MAX_ROUND {
-		total, _ := calculateTotal(req.Id)
-		row := getScoreRow(req.Id)
+		total, _ := calculateTotal(id)
+		row := getScoreRow(id)
 		info("Saving:", currentGame.name, total, row)
-		err = addScore(currentGame.name, total, req.Id, row)
+		err := addScore(currentGame.name, total, id, row)
 		if err != nil {
 			errout(err)
 		}

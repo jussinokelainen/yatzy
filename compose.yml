@@ -21,6 +21,9 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      # Overrides the automatic detection of https.
+      # Leave unset to detect it from the request.
+      # COOKIE_SECURE: ${COOKIE_SECURE}
     volumes:
       - ./logs:/logs
 

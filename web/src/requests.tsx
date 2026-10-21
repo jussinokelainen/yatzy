@@ -26,12 +26,14 @@ export async function loadLb(setlb: Function, type: string) {
 }
 
 // Function to make sending POST requests simpler
-export async function makePOSTrequest(url: string, body: any) {
+export async function makePOSTrequest(url: string, body?: any) {
   const fullUrl = `/${url}`;
   await fetch(fullUrl, {
     method: 'POST',
+    // Cookies are needed to identify the player
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
 
@@ -40,6 +42,8 @@ export async function makeGETrequest(url: string) {
   const fullUrl = `/${url}`;
   const response = await fetch(fullUrl, {
     method: 'GET',
+    // Cookies are needed to identify the player
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
 
