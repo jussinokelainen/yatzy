@@ -7,11 +7,9 @@ restart: build
 	@echo
 	@docker compose down
 
-	@sleep .2
 	@echo
 	@printf "[\e[35m INFO \e[0m] Starting server...\n"
 	@echo
-	@sleep .5
 	@docker compose up --build --detach
 
 server:

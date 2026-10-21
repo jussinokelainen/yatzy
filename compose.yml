@@ -1,7 +1,5 @@
 services:
   db:
-    stdin_open: true
-    tty: true
     image: postgres:latest
     ports:
       - 4321:5432

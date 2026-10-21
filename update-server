@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This script should only be used if the server
+# has to be restarted manually
+
 git pull
 make restart
 tmux neww -n logs docker compose logs -f
