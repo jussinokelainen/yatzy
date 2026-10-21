@@ -1,24 +1,25 @@
 CREATE TABLE IF NOT EXISTS results(
-	name  varchar,
-	score integer,
-	id    varchar,
-	row   varchar
+	name  VARCHAR,
+	score INTEGER,
+	id    VARCHAR,
+	row   VARCHAR,
+	time  INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS in_progress(
-	name     varchar,
-	id       varchar PRIMARY KEY,
-	scorerow varchar,
-	clicked  varchar,
-	roundnum integer
+	name     VARCHAR,
+	id       VARCHAR PRIMARY KEY,
+	scorerow VARCHAR,
+	clicked  VARCHAR,
+	roundnum INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS usermap(
-	id           varchar PRIMARY KEY,
-	name         varchar,
-	scorearray   integer ARRAY[15],
-	clickedarray boolean ARRAY[15],
-	dicevalue    integer ARRAY[5],
-	dicelocked   boolean ARRAY[5],
-	turncount    integer
+	id           VARCHAR PRIMARY KEY,
+	name         VARCHAR,
+	scorearray   INTEGER ARRAY[15],
+	clickedarray BOOLEAN ARRAY[15],
+	dicevalue    INTEGER ARRAY[5],
+	dicelocked   BOOLEAN ARRAY[5],
+	turncount    INTEGER
 );

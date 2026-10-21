@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -253,7 +254,9 @@ func getTopScores(c *gin.Context) {
 
 // Add a new score to the results
 func addScore(name string, score int, id string, row string) error {
-	sqlStatement := `INSERT INTO results(name, score, id, row) VALUES($1, $2, $3, $4);`
-	_, err := db.Exec(sqlStatement, name, score, id, row)
+	time := time.Now().Unix()
+	sqlStatement := `INSERT INTO results(name, score, id, row, time) VALUES($1, $2, $3, $4, $5);`
+	_, err := db.Exec(sqlStatement, name, score, id, row, time)
+	info("Saved:", name, score, row, time)
 	return err
 }

@@ -120,7 +120,6 @@ func itemSelector(c *gin.Context) {
 	if currentGame.roundNum >= MAX_ROUND {
 		total, _ := calculateTotal(id)
 		row := getScoreRow(id)
-		info("Saving:", currentGame.name, total, row)
 		err := addScore(currentGame.name, total, id, row)
 		if err != nil {
 			errout(err)
