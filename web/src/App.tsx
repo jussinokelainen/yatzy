@@ -308,7 +308,7 @@ const App = () => {
 
                   {Array.from(diceState.entries()).map(([i, value]) => (
                     <div className='dice-container' key={i}>
-                      {<Button2 handleClick={() => toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
+                      {<Button2 handleClick={async () => await toggleLock(i)} text={<div className={diceImages.get(value)}></div>} />}
                       <div className={lockState[i] ? 'locked' : ''} />
                     </div>
                   ))}
