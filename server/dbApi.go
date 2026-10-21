@@ -1,12 +1,52 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
+
+var (
+	ErrUsernameTaken = errors.New("username already taken")
+	ErrInvalidInput  = errors.New("invalid username or password")
+)
+
+func CreateUser(ctx context.Context, username, password string) (int64, error) {
+	username = strings.TrimSpace(username)
+	if len(username) < 3 || len(username) > 32 {
+		return 0, ErrInvalidInput
+	}
+
+	if len(password) < 8 || len(password) > 72 {
+		return 0, ErrInvalidInput
+	}
+
+	// bcrypt only uses the first 72 bytes
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, err
+	}
+
+	var id int64
+	err = db.QueryRowContext(ctx,
+		`INSERT INTO users (username, password_hash)
+		VALUES ($1, $2)
+		RETURNING id`, username, string(hash)).Scan(&id)
+	if err != nil {
+		// 23505 = unique_violation
+		var se interface{ SQLState() string }
+		if errors.As(err, &se) && se.SQLState() == "23505" {
+			return 0, ErrUsernameTaken
+		}
+		return 0, err
+	}
+	return id, nil
+}
 
 // Adds a new ongoing game to the database, or edits and existing one
 // if there is one with given id
@@ -254,9 +294,8 @@ func getTopScores(c *gin.Context) {
 
 // Add a new score to the results
 func addScore(name string, score int, id string, row string) error {
-	time := time.Now().Unix()
-	sqlStatement := `INSERT INTO results(name, score, id, row, time) VALUES($1, $2, $3, $4, $5);`
-	_, err := db.Exec(sqlStatement, name, score, id, row, time)
-	info("Saved:", name, score, row, time)
+	sqlStatement := `INSERT INTO results(name, score, id, row) VALUES($1, $2, $3, $4);`
+	_, err := db.Exec(sqlStatement, name, score, id, row)
+	info("Saved:", name, score, row)
 	return err
 }
