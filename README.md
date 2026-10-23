@@ -14,8 +14,10 @@ DATABASE_NAME="<name>"
 DATABASE_USER="<user>"
 DATABASE_PASSWORD="<password>"
 
+ALLOW_NEW_USERS=<bool>
+
 # Optional
-COOKIE_SECURE=boolean
+COOKIE_SECURE=<bool>
 ```
 
 Optional COOKIE_SECURE variable can be set to true or false
@@ -40,10 +42,18 @@ can be used.
 ## Accounts
 
 Players log in with an account that they create from the website.
-New accounts are not allowed to play right away, they have to be
-enabled by hand in the database:
+Each account can be restricted from playing or allowed to play
+using the 2 scripts in the project root directory:
 
+```bash
+./allow-user username
+./disallow-user username
 ```
+
+if `ALLOW_NEW_USERS` is set to false new users have to be
+enabled manually with `./allow-user username` or directly:
+
+```bash
 docker compose exec db psql -U <user> -d <name> \
 	-c "UPDATE users SET allowed=true WHERE username='<username>';"
 ```
