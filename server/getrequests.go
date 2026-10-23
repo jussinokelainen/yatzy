@@ -1,10 +1,10 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"math/rand/v2"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,68 +12,76 @@ import (
 // Function that returns the current round the game is on
 // as the response to the request
 func getRound(c *gin.Context) {
-	id := getUserKey(c)
-	currentGame := loadCurrentGame(id)
+	user, _ := getUserInfo(c)
+	currentGame, err := loadActiveGame(user.id)
+	if errors.Is(err, sql.ErrNoRows) {
+		// The game may have just been finished
+		currentGame, err = loadLatestFinishedGame(user.id)
+	}
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no game in progress"})
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"roundnumber": currentGame.roundNum,
 	})
 }
 
-// Function that checks whether progess exists for a user,
-// returns a boolean and the name which the progress was saved with.
-// If there is no progress, name might return something undefined
+// Function that checks whether the user of the request has
+// an ongoing game they have already played at least one round of
 func checkExistingProgress(c *gin.Context) {
-	exists := true
-	id := getUserKey(c)
-	progress, err := loadProgress(id)
-	if err != nil {
-		exists = false
-	}
+	user, _ := getUserInfo(c)
+	currentGame, err := loadActiveGame(user.id)
+	exists := err == nil && currentGame.roundNum > 0
+
 	c.IndentedJSON(http.StatusOK, gin.H{
-		"name":   progress.Name,
 		"exists": exists,
 	})
-
 }
 
-// Start a game for the player of the request with given name,
-// loads existing progress and uses that if it exists
+// Start a game for the user of the request, loads their ongoing
+// game if they have one, otherwise a new empty game is created.
+// The response contains the whole state of the game.
 func startGame(c *gin.Context) {
-	id := getUserKey(c)
-	name := c.Query("name")
+	user, _ := getUserInfo(c)
 
-	if name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Name is required"})
+	currentGame, err := loadActiveGame(user.id)
+	if err != nil {
+		// No game in progress, start a new one
+		currentGame, err = createActiveGame(user.id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not start a game"})
+			return
+		}
+	}
+
+	var values [5]int
+	var locked [5]bool
+	for i := range currentGame.diceArray {
+		values[i] = currentGame.diceArray[i].value
+		locked[i] = currentGame.diceArray[i].locked
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"success":    true,
+		"scorerow":   currentGame.scorearray,
+		"clickedrow": currentGame.clickedarray,
+		"roundnum":   currentGame.roundNum,
+		"dice":       values,
+		"locked":     locked,
+	})
+}
+
+// Rolls the dice for the user of the request, returns them to the caller as JSON
+func rollDice(c *gin.Context) {
+	user, _ := getUserInfo(c)
+	currentGame, err := loadActiveGame(user.id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no game in progress"})
 		return
 	}
 
-	progress := InitUser(id, name)
-
-	var parsedClickRow [15]bool
-	parsedClickstrings := strings.Split(progress.Clicked, ";")
-	for i := range parsedClickstrings {
-		parsedClickRow[i], _ = strconv.ParseBool(parsedClickstrings[i])
-	}
-
-	var parsedScoreRow [15]int
-	parsedScorestrings := strings.Split(progress.Scorerow, ";")
-	for i := range parsedScorestrings {
-		parsedVal, _ := strconv.ParseInt(parsedScorestrings[i], 10, 0)
-		parsedScoreRow[i] = int(parsedVal)
-	}
-
-	c.IndentedJSON(http.StatusOK, gin.H{
-		"name":       progress.Name,
-		"scorerow":   parsedScoreRow,
-		"clickedrow": parsedClickRow,
-		"roundnum":   progress.Roundnum,
-	})
-}
-
-// Rolls the dice for the player of the request, returns them to the caller as JSON
-func rollDice(c *gin.Context) {
-	id := getUserKey(c)
-	currentGame := loadCurrentGame(id)
 	dicearr := &currentGame.diceArray
 
 	// Generate new values for all dice
@@ -86,7 +94,11 @@ func rollDice(c *gin.Context) {
 
 	// Update database to have current dice values,
 	// and return them as the response to the http request
-	updateCurrentGame(id, currentGame)
+	if err := saveGame(currentGame); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save game"})
+		return
+	}
+
 	var values [5]int
 	for i := range dicearr {
 		values[i] = dicearr[i].value
@@ -98,17 +110,25 @@ func rollDice(c *gin.Context) {
 	})
 }
 
-// Loads data of ongoing game and returns it as the http response
+// Loads data of the ongoing game and returns it as the http response.
+// Falls back to the most recently finished game, so the final score
+// can still be read after the game has ended.
 func getScoresByID(c *gin.Context) {
-	id := getUserKey(c)
+	user, _ := getUserInfo(c)
+	currentGame, err := loadActiveGame(user.id)
+	if errors.Is(err, sql.ErrNoRows) {
+		currentGame, err = loadLatestFinishedGame(user.id)
+	}
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no game found"})
+		return
+	}
 
-	currentGame := loadCurrentGame(id)
-	scoreRow := currentGame.scorearray
-	total, subTotal := calculateTotal(id)
+	total, subTotal := calculateTotal(currentGame)
 
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"success":  true,
-		"scores":   scoreRow,
+		"scores":   currentGame.scorearray,
 		"total":    total,
 		"subTotal": subTotal,
 	})

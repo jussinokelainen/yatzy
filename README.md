@@ -36,3 +36,26 @@ docker compose up --build
 ```
 
 can be used.
+
+## Accounts
+
+Players log in with an account that they create from the website.
+New accounts are not allowed to play right away, they have to be
+enabled by hand in the database:
+
+```
+docker compose exec db psql -U <user> -d <name> \
+	-c "UPDATE users SET allowed=true WHERE username='<username>';"
+```
+
+Login sessions are stored in the database as hashed tokens and are
+valid for 30 days. Logging out removes the session from the database.
+
+Since the database schema was redesigned for accounts, databases
+created with an older version of the schema do not work anymore and
+need to be recreated, which wipes all existing scores:
+
+```
+docker compose down -v
+make restart
+```

@@ -78,15 +78,24 @@ func main() {
 	// maybe make all requests be part of some group
 	api := router.Group("/api")
 	{
+		// Account routes
+		api.POST("/register", register)
+		api.POST("/login", login)
+		api.POST("/logout", logout)
+		api.GET("/me", getMe)
+
+		// Leaderboards, public
 		api.GET("/getscores", getTopScores)
 		api.GET("/getstats", getStatsById)
 	}
 
 	// Routes that belong to a single player. The player is identified by
-	// an http only cookie instead of the id being part of the url.
+	// their session cookie instead of the id being part of the url.
 	game := router.Group("/")
 	{
-		game.Use(userKeyMiddleware)
+		game.Use(requireSession)
+		// Accounts that have not been allowed yet can not play
+		game.Use(requireAllowed)
 
 		// POST requests
 		game.POST("/restart", restartGame)

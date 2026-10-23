@@ -8,10 +8,13 @@ let LBWIDTH = 3
 
 const MAXROUND = 15
 const STATE = {
-  askName: 0,
-  showLeaderBoard: 1,
-  mainGameUI: 2,
-  endScreen: 3
+  loading: 0,
+  auth: 1,
+  pending: 2,
+  mainMenu: 3,
+  showLeaderBoard: 4,
+  mainGameUI: 5,
+  endScreen: 6
 }
 
 // Global data to load already clicked items into
@@ -32,7 +35,7 @@ const diceImages = new Map([
 
 // Main app function
 const App = () => {
-  const [gameState, setGameState] = useState(STATE.askName)
+  const [gameState, setGameState] = useState(STATE.loading)
   const [diceState, setDiceState] = useState([0, 0, 0, 0, 0]);
   const [lockState, setLockState] = useState([false, false, false, false, false]);
   const [name, setName] = useState('');
@@ -40,67 +43,132 @@ const App = () => {
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
 
-  // Function to check whether a player has existing progress stored
-  // in the database. returns [<bool>, <name>] where <bool> is whether
-  // progress exists, and <name> is the name saved with the progress.
-  // If the bool is false, <name> might be undefined
-  async function checkProgressPreGame() {
-    const response = await makeGETrequest(`checkExistingProgress`)
-    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
-    const progress = await response.json();
-    if (progress.exists) {
-      setName(progress.name)
+  // Auth screen values
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [usernameInput, setUsernameInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [authError, setAuthError] = useState('')
+
+  // Whether the logged in user has a game they can continue
+  const [hasProgress, setHasProgress] = useState(false)
+
+  // Check whether the request lost the login, for example
+  // because the session expired, and go to the login screen if so
+  async function handleAuthError(response: Response): Promise<boolean> {
+    if (response.status === 401) {
+      setGameState(STATE.auth)
+      return true
     }
-    return [progress.exists, progress.name]
+    return false
+  }
+
+  // Reload the account of the logged in user and decide
+  // which screen to show based on it
+  async function loadAccount() {
+    const response = await makeGETrequest(`api/me`)
+    if (!response.ok) { setGameState(STATE.auth); return }
+    const me = await response.json();
+    if (!me.logged_in) {
+      setGameState(STATE.auth)
+      return
+    }
+
+    setName(me.username)
+    if (!me.allowed) {
+      // The account has not been enabled yet
+      setGameState(STATE.pending)
+      return
+    }
+
+    // Check whether the user has a game they can continue
+    const progressResponse = await makeGETrequest(`checkExistingProgress`)
+    if (await handleAuthError(progressResponse)) { return }
+    if (progressResponse.ok) {
+      const progress = await progressResponse.json();
+      setHasProgress(progress.exists)
+    }
+
+    setGameState(STATE.mainMenu)
   }
 
   // useEffect that gets ran once when the website is first opened
   // if i understand correctly
   useEffect(() => {
-    async function load() {
-      const check = await checkProgressPreGame()
-      if (check[0]) {
-        startGame(check[1])
-      } else {
-        setGameState(STATE.askName)
-      }
-    }
-
-    load()
+    loadAccount()
   }, [])
 
-  // Start game with either existing progress or a new game
-  async function startGame(newName: string) {
-    // Game already runnińg, nothing to do
-    if (gameState == STATE.mainGameUI) { return }
+  // Log in or create an account with the values typed
+  // into the auth screen
+  async function authSubmit() {
+    setAuthError('')
+    if (usernameInput == '' || passwordInput == '') {
+      setAuthError('Username and password are required')
+      return
+    }
 
-    // No name is given, do not start the game
-    if (newName == '') { return }
+    const response = await makePOSTrequest(`api/${authMode}`, {
+      username: usernameInput,
+      password: passwordInput,
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      setAuthError(data.error ?? 'Something went wrong')
+      return
+    }
 
-    // Get game data from server, loads existing progress if it exists,
-    // otherwise a new game is initialized. The player is identified by
-    // the cookie the server sets, so no id is needed here.
-    const response = await makeGETrequest(`start?name=${encodeURIComponent(newName)}`)
-    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
-    const progressData = await response.json();
-    preClicked = progressData.clickedrow
-    setGameState(STATE.mainGameUI)
+    // Clean the password field, but keep the username
+    setPasswordInput('')
+    await loadAccount()
   }
 
-  // Reset client side game values
+  // Send the user to the login screen and
+  // reset client side game values
   function resetClient() {
     setLockState([false, false, false, false, false])
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
     rollCount_global = 0
     setTotal(0)
-    setGameState(STATE.askName)
   }
 
-  // Restart the game
-  function restartGame() {
-    makePOSTrequest('restart')
+  // Log the user out and show the login screen
+  async function logout() {
+    await makePOSTrequest('api/logout')
     resetClient()
+    setName('')
+    setHasProgress(false)
+    setGameState(STATE.auth)
+  }
+
+  // Load the game state of the logged in user and
+  // go to the game screen
+  async function loadGame() {
+    // Get game data from server, loads existing progress if it exists,
+    // otherwise a new game is initialized. The player is identified by
+    // the session cookie the server set when logging in.
+    const response = await makeGETrequest(`start`)
+    if (await handleAuthError(response)) { return }
+    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
+    const gameData = await response.json();
+    preClicked = gameData.clickedrow
+    setDiceState(gameData.dice)
+    setLockState(gameData.locked)
+    setRollCount(0)
+    rollCount_global = 0
+    setGameState(STATE.mainGameUI)
+  }
+
+  // Start a new game, throwing away any ongoing one
+  async function newGame() {
+    await makePOSTrequest('restart')
+    await loadGame()
+  }
+
+  // Go back to the main menu with a fresh game state
+  async function backToMenu() {
+    await makePOSTrequest('restart')
+    resetClient()
+    await loadAccount()
   }
 
   // Function that is called when the game ends,
@@ -113,7 +181,8 @@ const App = () => {
   // Toggle the locking of a dice
   async function toggleLock(i: number) {
     if (diceState[i] != 0) {
-      await makePOSTrequest(`lockDice/${i}`)
+      const response = await makePOSTrequest(`lockDice/${i}`)
+      if (await handleAuthError(response)) { return }
       const newLocks = [...lockState]
       newLocks[i] = !newLocks[i]
       setLockState(newLocks)
@@ -141,6 +210,7 @@ const App = () => {
     }
 
     const response = await makeGETrequest(`rollDice`)
+    if (await handleAuthError(response)) { return }
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
@@ -169,6 +239,7 @@ const App = () => {
     setRollCount(0)
     rollCount_global = 0
     const response = await makeGETrequest(`getRoundNumber`)
+    if (await handleAuthError(response)) { return }
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const roundNum = await response.json();
     if (roundNum.roundnumber >= MAXROUND) {
@@ -185,7 +256,7 @@ const App = () => {
   // Function to load leaderboard data and set the width
   // to match the type of leaderboard that gets shown
   function showLeaderBoard(type: string) {
-    if (type === 'id') {
+    if (type === 'user') {
       showTotalGames = true
       LBWIDTH = 4
     } else {
@@ -198,30 +269,65 @@ const App = () => {
   }
 
   switch (gameState) {
-    case STATE.askName:
-      // Ask for name from user
+    case STATE.loading:
+      // Checking the login status, nothing to show yet
+      return (
+        <div></div>
+      )
+    case STATE.auth:
+      // Ask the user to log in or create an account
       return (
         <div className="gameover-table">
           <table className="gameover-table">
             <tbody>
               <tr>
                 <td className="gameover-table">
-                  <p className="gameover-text">Enter your name</p>
+                  <p className="gameover-text">{authMode === 'login' ? 'Log in' : 'Create account'}</p>
                 </td>
               </tr>
               <tr>
                 <td className="gameover-table">
                   <input
-                    value={name}
-                    onChange={e => setName(e.target.value)}
+                    value={usernameInput}
+                    onChange={e => setUsernameInput(e.target.value)}
                     className="nameinput-box"
-                    onFocus={() => { setName('') }}
+                    placeholder="Username"
+                    autoComplete="username"
                   />
                 </td>
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <Button handleClick={() => startGame(name)} text="Start game" className="gameover-buttons" />
+                  <input
+                    type="password"
+                    value={passwordInput}
+                    onChange={e => setPasswordInput(e.target.value)}
+                    className="nameinput-box"
+                    placeholder="Password"
+                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                    onKeyDown={e => { if (e.key === 'Enter') { authSubmit() } }}
+                  />
+                </td>
+              </tr>
+              {authError !== '' ?
+                <tr>
+                  <td className="gameover-table">
+                    <p className="auth-error">{authError}</p>
+                  </td>
+                </tr> : null
+              }
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={authSubmit} text={authMode === 'login' ? 'Log in' : 'Create account'} className="gameover-buttons" />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button
+                    handleClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError('') }}
+                    text={authMode === 'login' ? 'Create an account' : 'Log in instead'}
+                    className="gameover-buttons"
+                  />
                 </td>
               </tr>
               <tr>
@@ -231,7 +337,79 @@ const App = () => {
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <Button handleClick={() => showLeaderBoard('id')} text="Leaderboard by id" className="gameover-buttons" />
+                  <Button handleClick={() => showLeaderBoard('user')} text="Leaderboard by user" className="gameover-buttons" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
+    case STATE.pending:
+      // The account exists but has not been allowed to play yet
+      return (
+        <div className="gameover-table">
+          <table className="gameover-table">
+            <tbody>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Logged in as {name}</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Your account has not been enabled yet</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Ask the admin to enable it</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={logout} text='Log out' className="gameover-buttons" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
+    case STATE.mainMenu:
+      // Main menu of a logged in user
+      return (
+        <div className="gameover-table">
+          <table className="gameover-table">
+            <tbody>
+              <tr>
+                <td className="gameover-table">
+                  <p className="gameover-text">Logged in as {name}</p>
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={newGame} text='New game' className="gameover-buttons" />
+                </td>
+              </tr>
+              {hasProgress ?
+                <tr>
+                  <td className="gameover-table">
+                    <Button handleClick={loadGame} text='Continue game' className="gameover-buttons" />
+                  </td>
+                </tr> : null
+              }
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={() => showLeaderBoard('name')} text='Top 20 results' className="gameover-buttons" />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={() => showLeaderBoard('user')} text='Leaderboard by user' className="gameover-buttons" />
+                </td>
+              </tr>
+              <tr>
+                <td className="gameover-table">
+                  <Button handleClick={logout} text='Log out' className="gameover-buttons" />
                 </td>
               </tr>
             </tbody>
@@ -279,7 +457,7 @@ const App = () => {
               ))}
               <tr>
                 <td colSpan={LBWIDTH} className="leaderboard-screen">
-                  <Button handleClick={resetClient} text='Back' className="gameover-buttons" />
+                  <Button handleClick={loadAccount} text='Back' className="gameover-buttons" />
                 </td>
               </tr>
             </tbody>
@@ -300,7 +478,7 @@ const App = () => {
                     name={name}
                   />
 
-                  <Button handleClick={restartGame} text='Restart game' className="restart-container" />
+                  <Button handleClick={backToMenu} text='Restart game' className="restart-container" />
                 </td>
                 <td className="scoreboard-table">
                   <p className="gameover-text"><RollsLeft /></p>
@@ -338,7 +516,7 @@ const App = () => {
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <Button handleClick={restartGame} text='Main menu' className="gameover-buttons" />
+                  <Button handleClick={backToMenu} text='Main menu' className="gameover-buttons" />
                 </td>
               </tr>
             </tbody>

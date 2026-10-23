@@ -1,27 +1,12 @@
 package main
 
-// Struct used to store and load data
-// from the in_progress database table
-type progressData struct {
-	Name     string `json:"name"`
-	Id       string `json:"id"`
-	Scorerow string `json:"scorerow"`
-	Clicked  string `json:"clicked"`
-	Roundnum int    `json:"roundnum"`
-}
-
-// Struct used when loading data from
-// the results database table
-type UserDataStruct struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
-	Id    string `json:"id"`
-	Row   string `json:"row"`
-}
-
-// Struct used for handling ongoing games' data
+// Struct used for handling ongoing games' data.
+// scorearray and clickedarray mirror the scores array of
+// the games database table, where a NULL value means the
+// item has not been selected yet.
 type GameData struct {
-	name         string
+	id           int64
+	userID       int64
 	scorearray   [15]int
 	clickedarray [15]bool
 	diceArray    [5]DiceData
@@ -32,4 +17,12 @@ type GameData struct {
 type DiceData struct {
 	value  int
 	locked bool
+}
+
+// Struct describing a logged in user, filled from
+// the sessions and users database tables
+type UserInfo struct {
+	id       int64
+	username string
+	allowed  bool
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 	"strings"
@@ -48,41 +49,158 @@ func CreateUser(ctx context.Context, username, password string) (int64, error) {
 	return id, nil
 }
 
-// Adds a new ongoing game to the database, or edits and existing one
-// if there is one with given id
-func updateCurrentGame(id string, data GameData) error {
+// Looks up a user by username and checks the given password
+// against the stored hash. Returns ErrInvalidInput both when the
+// user does not exist and when the password is wrong, so the
+// caller cannot tell the two apart.
+func AuthenticateUser(ctx context.Context, username, password string) (UserInfo, error) {
+	var user UserInfo
+	var hash string
+
+	username = strings.TrimSpace(username)
+	err := db.QueryRowContext(ctx,
+		`SELECT id, username, password_hash, allowed
+		FROM users
+		WHERE lower(username) = lower($1)`, username).
+		Scan(&user.id, &user.username, &hash, &user.allowed)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return user, ErrInvalidInput
+		}
+		return user, err
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
+		return user, ErrInvalidInput
+	}
+	return user, nil
+}
+
+// Adds a new ongoing game for the given user, or returns the
+// existing one if the user already has a game in progress
+func createActiveGame(userID int64) (GameData, error) {
+	var game GameData
+
+	err := db.QueryRow(
+		`INSERT INTO games (user_id)
+		VALUES ($1)
+		ON CONFLICT (user_id) WHERE status = 'in_progress'
+		DO UPDATE SET user_id = EXCLUDED.user_id
+		RETURNING id;`,
+		userID,
+	).Scan(&game.id)
+	if err != nil {
+		errout("Error creating a game")
+		errout(err)
+		return game, err
+	}
+
+	game.userID = userID
+	return game, nil
+}
+
+// Load the ongoing game of the given user. Returns
+// sql.ErrNoRows when the user has no game in progress.
+// In the scores array a NULL value means the item has not
+// been selected yet, so two arrays are read: the scores with
+// NULLs replaced by 0, and the selected item flags.
+func loadActiveGame(userID int64) (GameData, error) {
+	return loadGame(userID, `WHERE g.user_id = $1 AND g.status = 'in_progress'`)
+}
+
+// Load the most recently finished game of the given user.
+// Used to answer requests that happen right after the
+// ongoing game has been finished.
+func loadLatestFinishedGame(userID int64) (GameData, error) {
+	return loadGame(userID,
+		`WHERE g.user_id = $1 AND g.status = 'finished'
+		ORDER BY g.finished_at DESC LIMIT 1`)
+}
+
+func loadGame(userID int64, whereClause string) (GameData, error) {
+	var game GameData
+	var scores pq.Int32Array
+	var selected pq.BoolArray
+	var dicevalues pq.Int32Array
+	var dicelocked pq.BoolArray
+
+	// whereClause is only ever built from the constants above
 	sqlStatement := `
-		INSERT INTO usermap (
+		SELECT
 			id,
-			name,
-			scorearray,
-			clickedarray,
-			dicevalue,
-			dicelocked,
-			turncount
+			(SELECT array_agg(COALESCE(s, 0) ORDER BY o)
+				FROM unnest(g.scores) WITH ORDINALITY AS t(s, o)),
+			(SELECT array_agg(s IS NOT NULL ORDER BY o)
+				FROM unnest(g.scores) WITH ORDINALITY AS t(s, o)),
+			dice,
+			dice_locked,
+			turn_count
+		FROM games g
+		` + whereClause + `;`
+
+	err := db.QueryRow(sqlStatement, userID).Scan(
+		&game.id,
+		&scores,
+		&selected,
+		&dicevalues,
+		&dicelocked,
+		&game.roundNum,
+	)
+	if err != nil {
+		return game, err
+	}
+
+	game.userID = userID
+	for i := range 15 {
+		game.scorearray[i] = int(scores[i])
+		game.clickedarray[i] = selected[i]
+	}
+	game.diceArray = formDiceArray(dicevalues, dicelocked)
+
+	return game, nil
+}
+
+// Saves the state of the given user's ongoing game,
+// or edits the existing one if there is one
+func saveGame(game GameData) error {
+	// Items that have not been selected yet are stored as NULLs
+	sqlStatement := `
+		INSERT INTO games (
+			user_id,
+			scores,
+			dice,
+			dice_locked,
+			turn_count
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (id)
+		VALUES (
+			$1,
+			ARRAY(
+				SELECT CASE WHEN clicked THEN score ELSE NULL END
+				FROM unnest($2::integer[], $3::boolean[]) AS t(score, clicked)
+			),
+			$4,
+			$5,
+			$6
+		)
+		ON CONFLICT (user_id) WHERE status = 'in_progress'
 		DO UPDATE SET
-			name = EXCLUDED.name,
-			scorearray = EXCLUDED.scorearray,
-			clickedarray = EXCLUDED.clickedarray,
-			dicevalue = EXCLUDED.dicevalue,
-			dicelocked = EXCLUDED.dicelocked,
-			turncount = EXCLUDED.turncount;
+			scores = EXCLUDED.scores,
+			dice = EXCLUDED.dice,
+			dice_locked = EXCLUDED.dice_locked,
+			turn_count = EXCLUDED.turn_count
+		RETURNING id;
 	`
 
-	dicevalues, dicelocked := parseDiceArrays(data.diceArray)
-	_, err := db.Exec(
+	dicevalues, dicelocked := parseDiceArrays(game.diceArray)
+	err := db.QueryRow(
 		sqlStatement,
-		id,
-		data.name,
-		pq.Array(data.scorearray),
-		pq.Array(data.clickedarray),
-		pq.Array(dicevalues),
-		pq.Array(dicelocked),
-		data.roundNum,
-	)
+		game.userID,
+		pq.Array(game.scorearray[:]),
+		pq.Array(game.clickedarray[:]),
+		pq.Array(dicevalues[:]),
+		pq.Array(dicelocked[:]),
+		game.roundNum,
+	).Scan(&game.id)
 	if err != nil {
 		errout("Error updating current game values")
 		errout(err)
@@ -91,136 +209,31 @@ func updateCurrentGame(id string, data GameData) error {
 	return err
 }
 
-// Load data of ongoing game with given id
-func loadCurrentGame(id string) GameData {
-	var data GameData
-	dicevalues := pq.Int32Array{}
-	dicelocked := pq.BoolArray{}
-	pq_scorearray := pq.Int32Array{}
-	pq_clickedarray := pq.BoolArray{}
+// Delete the ongoing game of the given user
+func deleteActiveGame(userID int64) error {
+	sqlStatement := `DELETE FROM games WHERE user_id = $1 AND status = 'in_progress';`
 
-	sqlStatement := `
-		SELECT
-			name,
-			scorearray,
-			clickedarray,
-			dicevalue,
-			dicelocked,
-			turncount
-		FROM
-			usermap
-		WHERE
-			id = $1;
-	`
-
-	err := db.QueryRow(sqlStatement, id).Scan(
-		&data.name,
-		&pq_scorearray,
-		&pq_clickedarray,
-		&dicevalues,
-		&dicelocked,
-		&data.roundNum,
-	)
-
-	if err != nil {
-		errout("Error loading current game values")
-		errout(err)
-		return data
-	}
-
-	tmp_scorearray := []int32(pq_scorearray)
-	for i := range 15 {
-		data.scorearray[i] = int(tmp_scorearray[i])
-		data.clickedarray[i] = pq_clickedarray[i]
-	}
-
-	data.diceArray = formDiceArray(dicevalues, dicelocked)
-
-	return data
-}
-
-// Delete ongoing game for given id from the database
-func deleteCurrentGame(id string) error {
-	sqlStatement := `DELETE FROM usermap WHERE id = $1;`
-
-	_, err := db.Exec(sqlStatement, id)
+	_, err := db.Exec(sqlStatement, userID)
 
 	return err
 }
 
-// Save progress of a game for given player
-func saveProgress(progress progressData) error {
+// Marks the ongoing game of the given user as finished
+// and stores its total score
+func finishGame(userID int64, totalScore int) error {
 	sqlStatement := `
-		INSERT INTO in_progress (
-			name, id, scorerow, clicked, roundnum
-		)
-		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (id)
-		DO UPDATE SET
-			name = EXCLUDED.name,
-			scorerow = EXCLUDED.scorerow,
-			clicked = EXCLUDED.clicked,
-			roundnum = EXCLUDED.roundnum;
+		UPDATE games
+		SET status = 'finished', total_score = $2, finished_at = now()
+		WHERE user_id = $1 AND status = 'in_progress';
 	`
 
-	_, err := db.Exec(
-		sqlStatement,
-		progress.Name,
-		progress.Id,
-		progress.Scorerow,
-		progress.Clicked,
-		progress.Roundnum,
-	)
+	_, err := db.Exec(sqlStatement, userID, totalScore)
 
 	return err
 }
 
-// Load progress of player with given id
-// returns an error if no progress exists or there was an
-// error retrieving it
-func loadProgress(id string) (progressData, error) {
-	var data progressData
-
-	sqlStatement := `
-		SELECT
-			name,
-			id,
-			scorerow,
-			clicked,
-			roundnum
-		FROM
-			in_progress
-		WHERE
-			id = $1;
-	`
-
-	err := db.QueryRow(sqlStatement, id).Scan(
-		&data.Name,
-		&data.Id,
-		&data.Scorerow,
-		&data.Clicked,
-		&data.Roundnum,
-	)
-
-	if err != nil {
-		errout("Error loading progress data")
-		errout(err)
-	}
-
-	return data, err
-}
-
-// Delete progress of player with given id
-func deleteProgress(id string) error {
-	sqlStatement := `DELETE FROM in_progress WHERE id = $1;`
-
-	_, err := db.Exec(sqlStatement, id)
-
-	return err
-}
-
-// Get the name, max score and games played
-// of each id in the results database table
+// Get the username, best score and games played
+// of every user that has finished games
 func getStatsById(c *gin.Context) {
 	type StatStruct struct {
 		Name  string `json:"name"`
@@ -229,13 +242,17 @@ func getStatsById(c *gin.Context) {
 	}
 	results := []StatStruct{}
 
-	sqlStatement := `SELECT mode() WITHIN GROUP (ORDER BY name) AS name, 
-					 MAX(score) AS score, 
-					 COUNT(*) 
-	                 FROM results GROUP BY id ORDER BY score DESC;`
+	sqlStatement := `
+		SELECT u.username, MAX(g.total_score), COUNT(*)
+		FROM games g
+		JOIN users u ON u.id = g.user_id
+		WHERE g.status = 'finished'
+		GROUP BY u.id, u.username
+		ORDER BY MAX(g.total_score) DESC;
+	`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
-		errout("Error getting stats grouped by id")
+		errout("Error getting stats grouped by user")
 		errout(err)
 	}
 	defer rows.Close()
@@ -243,7 +260,7 @@ func getStatsById(c *gin.Context) {
 		var row StatStruct
 		err = rows.Scan(&row.Name, &row.Score, &row.Count)
 		if err != nil {
-			errout("Error parsing id grouped data")
+			errout("Error parsing user grouped data")
 			errout(err)
 		}
 		results = append(results, row)
@@ -251,7 +268,7 @@ func getStatsById(c *gin.Context) {
 
 	err = rows.Err()
 	if err != nil {
-		errout("Error in id grouped rows")
+		errout("Error in user grouped rows")
 		errout(err)
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{
@@ -260,11 +277,22 @@ func getStatsById(c *gin.Context) {
 	})
 }
 
-// Get the top 20 scores in the results database table
+// Get the 20 best finished games with the username of their player
 func getTopScores(c *gin.Context) {
-	results := []UserDataStruct{}
+	type ScoreStruct struct {
+		Name  string `json:"name"`
+		Score int    `json:"score"`
+	}
+	results := []ScoreStruct{}
 
-	sqlStatement := `SELECT name, score FROM results ORDER BY score DESC LIMIT 20;`
+	sqlStatement := `
+		SELECT u.username, g.total_score
+		FROM games g
+		JOIN users u ON u.id = g.user_id
+		WHERE g.status = 'finished'
+		ORDER BY g.total_score DESC
+		LIMIT 20;
+	`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		errout("Error in getting top scores")
@@ -272,7 +300,7 @@ func getTopScores(c *gin.Context) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var row UserDataStruct
+		var row ScoreStruct
 		err = rows.Scan(&row.Name, &row.Score)
 		if err != nil {
 			errout("Error parsing top score data")
@@ -290,12 +318,4 @@ func getTopScores(c *gin.Context) {
 		"success": true,
 		"result":  results,
 	})
-}
-
-// Add a new score to the results
-func addScore(name string, score int, id string, row string) error {
-	sqlStatement := `INSERT INTO results(name, score, id, row) VALUES($1, $2, $3, $4);`
-	_, err := db.Exec(sqlStatement, name, score, id, row)
-	info("Saved:", name, score, row)
-	return err
 }
