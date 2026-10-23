@@ -357,7 +357,7 @@ const App = () => {
               </tr>
               <tr>
                 <td className="gameover-table">
-                  <p className="gameover-text">Your account has not been enabled yet</p>
+                  <p className="gameover-text">Your account is currently disabled</p>
                 </td>
               </tr>
               <tr>

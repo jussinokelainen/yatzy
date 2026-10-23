@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Simple script to change a users allow status to true
+# without having to remember the exact command
+
+if [[ -z $1 ]]; then
+	echo "Username required!"
+	exit 2
+fi
+
+. ./.env
+
+USER=$1
+docker compose exec db psql -U $DATABASE_USER -d $DATABASE_NAME -c "UPDATE users SET allowed=true WHERE username='$USER';"
