@@ -11,4 +11,4 @@ fi
 . ./.env
 
 USER=$1
-docker compose exec db psql -U $DATABASE_USER -d $DATABASE_NAME -c "UPDATE users SET allowed=false WHERE username='$USER';"
+docker compose exec db psql -U $DATABASE_USER -d $DATABASE_NAME -c "UPDATE users SET allowed=false WHERE lower(username)=lower('$USER');"
