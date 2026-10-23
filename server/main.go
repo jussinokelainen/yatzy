@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/static"
@@ -18,11 +19,24 @@ const MAX_ROUND = 15
 
 var db *sql.DB
 var (
-	port     = 5432
-	user     = os.Getenv("DATABASE_USER")
-	password = os.Getenv("DATABASE_PASSWORD")
-	dbname   = os.Getenv("DATABASE_NAME")
+	port            = 5432
+	user            = ""
+	password        = ""
+	dbname          = ""
+	allow_new_users = false
 )
+
+func load_env() {
+	user = os.Getenv("DATABASE_USER")
+	password = os.Getenv("DATABASE_PASSWORD")
+	dbname = os.Getenv("DATABASE_NAME")
+
+	allow, err := strconv.ParseBool(os.Getenv("ALLOW_NEW_USERS"))
+	if err != nil {
+		allow = false
+	}
+	allow_new_users = allow
+}
 
 // Print helper functions
 func ok(msg ...any)     { log.Println(append([]any{"[\033[32m OK \033[0m]"}, msg...)...) }
@@ -44,6 +58,7 @@ func openDatabase() *sql.DB {
 }
 
 func main() {
+	load_env()
 	// Setup logging
 	timeNow := time.Now().Format("2006-01-02_15-04-05")
 	logFileName := "/logs/" + timeNow + ".log"

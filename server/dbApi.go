@@ -35,9 +35,9 @@ func CreateUser(ctx context.Context, username, password string) (int64, error) {
 
 	var id int64
 	err = db.QueryRowContext(ctx,
-		`INSERT INTO users (username, password_hash)
-		VALUES ($1, $2)
-		RETURNING id`, username, string(hash)).Scan(&id)
+		`INSERT INTO users (username, password_hash, allowed)
+		VALUES ($1, $2, $3)
+		RETURNING id`, username, string(hash), allow_new_users).Scan(&id)
 	if err != nil {
 		// 23505 = unique_violation
 		var se interface{ SQLState() string }
