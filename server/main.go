@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -82,6 +83,8 @@ func main() {
 	defer db.Close()
 
 	router := gin.Default()
+
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// router.Use(func(c *gin.Context) {
 	// 	c.Next()
