@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/static"
@@ -126,6 +128,28 @@ func main() {
 	}
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))
+
+	// Everything that is not an api route or a file in web/dist is
+	// handled by the frontend itself, which reads the url and shows
+	// the matching screen (for example /login or /game). Without this
+	// opening those urls directly would answer with a 404.
+	router.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		isAPI := path == "/api" || strings.HasPrefix(path, "/api/")
+		isPage := c.Request.Method == http.MethodGet || c.Request.Method == http.MethodHead
+
+		// Requests that were meant for the api stay plain 404s,
+		// and other methods than GET have no page to serve
+		if isAPI || !isPage {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+
+		// index.html names the hashed files of this exact build, so a
+		// cached copy would keep pointing at files a later build removed
+		c.Header("Cache-Control", "no-cache")
+		c.File("web/dist/index.html")
+	})
 
 	info("Server running...")
 	router.Run("0.0.0.0:2222")
