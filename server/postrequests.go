@@ -87,7 +87,6 @@ func itemSelector(c *gin.Context) {
 		return
 	}
 
-	info(item, "value calculated as", val, "from", currentGame.diceArray)
 	total, _ := calculateTotal(currentGame)
 
 	// Check if the game is over
