@@ -12,7 +12,7 @@ import {
 import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
 import { Scoreboard, getScores } from './scoreboard'
 
-let CAN_ROLL = true
+export let DICE_ROLLING = false
 
 const MAXROUND = 15
 
@@ -274,7 +274,7 @@ const App = () => {
 
   // Toggle the locking of a dice
   async function toggleLock(i: number) {
-    if (diceState[i] != 0) {
+    if (diceState[i] != 0 && !DICE_ROLLING) {
       const response = await makePOSTrequest(`lockDice/${i}`)
       if (await handleAuthError(response)) { return }
       const newLocks = [...lockState]
@@ -296,18 +296,18 @@ const App = () => {
     setDiceState(newValues)
   }
 
-  function enable_rolling() {
-    CAN_ROLL = true
+  function start_rolling() {
+    DICE_ROLLING = true
   }
 
-  function disable_rolling() {
-    CAN_ROLL = false
+  function stop_rolling() {
+    DICE_ROLLING = false
   }
 
   // Function that rolls the dice with visual client side rolling and
   // then setting the values to ones rolled by the server
   async function rollDice() {
-    if (rollCount >= 3 || !CAN_ROLL) {
+    if (rollCount >= 3 || DICE_ROLLING) {
       return;
     }
 
@@ -318,7 +318,7 @@ const App = () => {
     }
     const data = await response.json();
 
-    disable_rolling()
+    start_rolling()
 
     simulateRollOnce()
     setTimeout(simulateRollOnce, 200)
@@ -326,11 +326,11 @@ const App = () => {
     setTimeout(simulateRollOnce, 600)
     setTimeout(simulateRollOnce, 800)
     setTimeout(simulateRollOnce, 1000)
-    setTimeout(enable_rolling, 1200)
 
     setTimeout(() => {
       setDiceState(data.values)
-    }, 1100)
+    }, 1200)
+    setTimeout(stop_rolling, 1400)
 
     setRollCount(prevCount => prevCount + 1);
     rollCount_global += 1

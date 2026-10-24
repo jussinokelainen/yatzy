@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { makePOSTrequest, makeGETrequest } from "./requests";
-import { preClicked, rollCount_global } from "./App";
+import { preClicked, rollCount_global, DICE_ROLLING } from "./App";
 
 let total = 0
 let subTotal = 0
@@ -53,7 +53,7 @@ function SelectButton({ position, reset, idx }: SelectButtonProps) {
         setClicked(true)
     }
     async function handleClick() {
-        if (rollCount_global != 0) {
+        if (rollCount_global != 0 && !DICE_ROLLING) {
             await makePOSTrequest(`selectItem/${position}`)
             await setAsClicked()
             reset()
