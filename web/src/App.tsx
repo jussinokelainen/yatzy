@@ -5,6 +5,7 @@ import { loadLb, makePOSTrequest, makeGETrequest } from './requests'
 import { Scoreboard, getScores } from './scoreboard'
 let showTotalGames = false
 let LBWIDTH = 3
+let CAN_ROLL = true
 
 const MAXROUND = 15
 const STATE = {
@@ -202,10 +203,18 @@ const App = () => {
     setDiceState(newValues)
   }
 
+  function enable_rolling() {
+    CAN_ROLL = true
+  }
+
+  function disable_rolling() {
+    CAN_ROLL = false
+  }
+
   // Function that rolls the dice with visual client side rolling and
   // then setting the values to ones rolled by the server
   async function rollDice() {
-    if (rollCount >= 3) {
+    if (rollCount >= 3 || !CAN_ROLL) {
       return;
     }
 
@@ -216,12 +225,15 @@ const App = () => {
     }
     const data = await response.json();
 
+    disable_rolling()
+
     simulateRollOnce()
     setTimeout(simulateRollOnce, 200)
     setTimeout(simulateRollOnce, 400)
     setTimeout(simulateRollOnce, 600)
     setTimeout(simulateRollOnce, 800)
     setTimeout(simulateRollOnce, 1000)
+    setTimeout(enable_rolling, 1200)
 
     setTimeout(() => {
       setDiceState(data.values)
