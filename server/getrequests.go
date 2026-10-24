@@ -23,7 +23,7 @@ func getRound(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"roundnumber": currentGame.roundNum,
 	})
 }
@@ -35,7 +35,7 @@ func checkExistingProgress(c *gin.Context) {
 	currentGame, err := loadActiveGame(user.id)
 	exists := err == nil && currentGame.roundNum > 0
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"exists": exists,
 	})
 }
@@ -63,7 +63,7 @@ func startGame(c *gin.Context) {
 		locked[i] = currentGame.diceArray[i].locked
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success":    true,
 		"scorerow":   currentGame.scorearray,
 		"clickedrow": currentGame.clickedarray,
@@ -104,7 +104,7 @@ func rollDice(c *gin.Context) {
 		values[i] = dicearr[i].value
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"values":  values,
 	})
@@ -126,7 +126,7 @@ func getScoresByID(c *gin.Context) {
 
 	total, subTotal := calculateTotal(currentGame)
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"scores":   currentGame.scorearray,
 		"total":    total,

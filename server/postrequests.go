@@ -18,7 +18,7 @@ func restartGame(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
 // Locks dice given as c.Param for the user of the request
@@ -48,7 +48,7 @@ func lockDice(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
 // Saves the selected scoreboard item for the user of the request.
@@ -100,8 +100,11 @@ func itemSelector(c *gin.Context) {
 		}
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
-		"success":  true,
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		// scores
+		// total
+		// round number
 		"score":    val,
 		"total":    total,
 		"gameover": gameOver,

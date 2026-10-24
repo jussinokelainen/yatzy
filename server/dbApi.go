@@ -271,7 +271,7 @@ func getStatsById(c *gin.Context) {
 		errout("Error in user grouped rows")
 		errout(err)
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"result":  results,
 	})
@@ -314,7 +314,7 @@ func getTopScores(c *gin.Context) {
 		errout("Error in top score rows")
 		errout(err)
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"result":  results,
 	})

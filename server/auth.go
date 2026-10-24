@@ -273,7 +273,7 @@ func register(c *gin.Context) {
 	}
 
 	setSessionCookie(c, token)
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"username": strings.TrimSpace(req.Username),
 		"allowed":  false,
@@ -310,7 +310,7 @@ func login(c *gin.Context) {
 	}
 
 	setSessionCookie(c, token)
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"username": user.username,
 		"allowed":  user.allowed,
@@ -327,7 +327,7 @@ func logout(c *gin.Context) {
 	}
 
 	clearSessionCookie(c)
-	c.IndentedJSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
 // Returns the logged in user of the request, if any.
@@ -337,17 +337,17 @@ func logout(c *gin.Context) {
 func getMe(c *gin.Context) {
 	token, err := c.Cookie(sessionCookieName)
 	if err != nil || !looksLikeSessionToken(token) {
-		c.IndentedJSON(http.StatusOK, gin.H{"logged_in": false})
+		c.JSON(http.StatusOK, gin.H{"logged_in": false})
 		return
 	}
 
 	user, err := getSessionUser(c.Request.Context(), token)
 	if err != nil {
-		c.IndentedJSON(http.StatusOK, gin.H{"logged_in": false})
+		c.JSON(http.StatusOK, gin.H{"logged_in": false})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"logged_in": true,
 		"username":  user.username,
 		"allowed":   user.allowed,
