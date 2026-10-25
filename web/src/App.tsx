@@ -77,6 +77,7 @@ const App = () => {
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
+  const [subtotal, setSubTotal] = useState(0)
   // False while the game is being read from the server, so that
   // /game does not flash an empty scoreboard for a moment
   const [gameLoaded, setGameLoaded] = useState(false)
@@ -225,6 +226,7 @@ const App = () => {
     setRollCount(0)
     rollCount_global = 0
     setTotal(0)
+    setSubTotal(0)
     setGameLoaded(false)
   }
 
@@ -252,6 +254,8 @@ const App = () => {
     setDiceState(gameData.dice)
     setLockState(gameData.locked)
     setRollCount(gameData.roll_count)
+    setTotal(gameData.total)
+    setSubTotal(gameData.subtotal)
     rollCount_global = gameData.roll_count
     setGameLoaded(true)
   }
@@ -563,9 +567,12 @@ const App = () => {
           <tr>
             <td className="scoreboard-table">
               <Scoreboard
-                values={diceState}
                 reset={handleReset}
                 name={name}
+                total={total}
+                subtotal={subtotal}
+                setTotal={setTotal}
+                setSubTotal={setSubTotal}
               />
 
               <Button handleClick={backToMenu} text='Restart game' className="restart-container" />

@@ -63,6 +63,8 @@ func startGame(c *gin.Context) {
 		locked[i] = currentGame.diceArray[i].locked
 	}
 
+	total, sub_total := calculateTotal(currentGame)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success":    true,
 		"scorerow":   currentGame.scorearray,
@@ -71,6 +73,8 @@ func startGame(c *gin.Context) {
 		"dice":       values,
 		"locked":     locked,
 		"roll_count": currentGame.roll_count,
+		"total":      total,
+		"subtotal":   sub_total,
 	})
 }
 
