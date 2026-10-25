@@ -23,7 +23,7 @@ const indexTextToInt = new Map([
 
 // Function to get the score of current client id
 export async function getScores() {
-    const response = await makeGETrequest(`getScoresByID`)
+    const response = await makeGETrequest(`gameapi/getgamestats`)
     if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
     }
@@ -58,7 +58,7 @@ function SelectButton({ position, idx, functions }: SelectButtonProps) {
     }
     async function handleClick() {
         if (rollCount_global != 0 && !DICE_ROLLING) {
-            await makePOSTrequest(`selectItem/${position}`)
+            await makePOSTrequest(`gameapi/selectitem/${position}`)
             await setAsClicked()
             functions.reset()
         }

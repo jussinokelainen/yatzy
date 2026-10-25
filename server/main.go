@@ -94,8 +94,6 @@ func main() {
 	// 	}
 	// })
 
-	// This might be useless or idk,
-	// maybe make all requests be part of some group
 	api := router.Group("/api")
 	{
 		// Account routes
@@ -104,14 +102,13 @@ func main() {
 		api.POST("/logout", logout)
 		api.GET("/me", getMe)
 
-		// Leaderboards, public
-		api.GET("/getscores", getTopScores)
-		api.GET("/getstats", getStatsById)
+		// Leaderboards
+		api.GET("/leaderboard/topscores", getTopScores)
+		api.GET("/leaderboard/userstats", getUserStats)
 	}
 
-	// Routes that belong to a single player. The player is identified by
-	// their session cookie instead of the id being part of the url.
-	game := router.Group("/")
+	// Routes that belong to a single player.
+	game := router.Group("/gameapi")
 	{
 		game.Use(requireSession)
 		// Accounts that have not been allowed yet can not play
@@ -119,15 +116,15 @@ func main() {
 
 		// POST requests
 		game.POST("/restart", restartGame)
-		game.POST("/lockDice/:dice", lockDice)
-		game.POST("/selectItem/:what", itemSelector)
+		game.POST("/lockdice/:dice", lockDice)
+		game.POST("/selectitem/:what", itemSelector)
 
 		// GET requests
-		game.GET("/getRoundNumber", getRound)
-		game.GET("/checkExistingProgress", checkExistingProgress)
+		game.GET("/getroundnumber", getRound)
+		game.GET("/checkexistingprogress", checkExistingProgress)
 		game.GET("/start", startGame)
-		game.GET("/rollDice", rollDice)
-		game.GET("/getScoresByID", getScoresByID)
+		game.GET("/rolldice", rollDice)
+		game.GET("/getgamestats", getGameStats)
 	}
 
 	router.Use(static.Serve("/", static.LocalFile("web/dist", true)))

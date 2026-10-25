@@ -120,7 +120,7 @@ func rollDice(c *gin.Context) {
 // Loads data of the ongoing game and returns it as the http response.
 // Falls back to the most recently finished game, so the final score
 // can still be read after the game has ended.
-func getScoresByID(c *gin.Context) {
+func getGameStats(c *gin.Context) {
 	user, _ := getUserInfo(c)
 	currentGame, err := loadActiveGame(user.id)
 	if errors.Is(err, sql.ErrNoRows) {

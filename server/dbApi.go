@@ -271,7 +271,7 @@ func finishGame(userID int64, totalScore int) error {
 
 // Get the username, best score and games played
 // of every user that has finished games
-func getStatsById(c *gin.Context) {
+func getUserStats(c *gin.Context) {
 	type StatStruct struct {
 		Name  string `json:"name"`
 		Score int    `json:"score"`

@@ -2,10 +2,10 @@
 export async function loadLb(setlb: Function, type: string) {
   let apiUrl = ``;
   if (type === 'name') {
-    apiUrl = `api/getscores`
+    apiUrl = `api/leaderboard/topscores`
   }
   if (type === 'user') {
-    apiUrl = `api/getstats`
+    apiUrl = `api/leaderboard/userstats`
   }
   try {
     const response = await makeGETrequest(apiUrl)

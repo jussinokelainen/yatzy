@@ -139,7 +139,7 @@ const App = () => {
     }
 
     // Check whether the user has a game they can continue
-    const progressResponse = await makeGETrequest(`checkExistingProgress`)
+    const progressResponse = await makeGETrequest(`gameapi/checkexistingprogress`)
     if (await handleAuthError(progressResponse)) { return }
     if (progressResponse.ok) {
       const progress = await progressResponse.json();
@@ -253,7 +253,7 @@ const App = () => {
     // otherwise a new game is initialized. The player is identified by
     // the session cookie the server set when logging in.
     setGameLoaded(false)
-    const response = await makeGETrequest(`start`)
+    const response = await makeGETrequest(`gameapi/start`)
     if (await handleAuthError(response)) { return }
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const gameData = await response.json();
@@ -269,7 +269,7 @@ const App = () => {
 
   // Start a new game, throwing away any ongoing one
   async function newGame() {
-    await makePOSTrequest('restart')
+    await makePOSTrequest('gameapi/restart')
     // /game reads the fresh game when it is opened
     navigate('/game')
   }
@@ -281,7 +281,7 @@ const App = () => {
 
   // Go back to the main menu with a fresh game state
   async function backToMenu() {
-    await makePOSTrequest('restart')
+    await makePOSTrequest('gameapi/restart')
     resetClient()
     // The ongoing game was thrown away, so there is nothing to continue
     setHasProgress(false)
@@ -304,7 +304,7 @@ const App = () => {
   // have gone through, so guessing what happened would leave the
   // screen and the server showing different things.
   async function resyncLocks() {
-    const response = await makeGETrequest(`start`)
+    const response = await makeGETrequest(`gameapi/start`)
     if (!response.ok) { throw new Error(`Server error: ${response.status}`) }
     const data = await response.json();
     if (!Array.isArray(data.locked)) { throw new Error('No lock states in the answer') }
@@ -328,7 +328,7 @@ const App = () => {
     setOneLock(i, wanted)
 
     try {
-      const response = await makePOSTrequest(`lockDice/${i}`, { locked: wanted })
+      const response = await makePOSTrequest(`gameapi/lockdice/${i}`, { locked: wanted })
       if (await handleAuthError(response)) { return }
       if (!response.ok) {
         // The server refused the request and changed nothing, so
@@ -392,7 +392,7 @@ const App = () => {
       return;
     }
 
-    const response = await makeGETrequest(`rollDice`)
+    const response = await makeGETrequest(`gameapi/rolldice`)
     if (await handleAuthError(response)) { return }
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
@@ -424,7 +424,7 @@ const App = () => {
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
     rollCount_global = 0
-    const response = await makeGETrequest(`getRoundNumber`)
+    const response = await makeGETrequest(`gameapi/getroundnumber`)
     if (await handleAuthError(response)) { return }
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const roundNum = await response.json();
