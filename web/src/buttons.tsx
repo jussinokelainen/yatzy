@@ -1,11 +1,11 @@
 type ButtonProps = {
-  handleClick: any;
+  handleClick: Function;
   text: string;
   className: string;
 }
 
 export const Button = ({ handleClick, text, className }: ButtonProps) => (
-  <button className={className} onClick={handleClick}>
+  <button className={className} onClick={() => { handleClick() }}>
     {text}
   </button>
 )

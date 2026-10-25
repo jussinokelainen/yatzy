@@ -267,6 +267,11 @@ const App = () => {
     navigate('/game')
   }
 
+  // Continue existing game
+  async function continueGame() {
+    navigate('/game')
+  }
+
   // Go back to the main menu with a fresh game state
   async function backToMenu() {
     await makePOSTrequest('restart')
@@ -485,7 +490,7 @@ const App = () => {
           {hasProgress ?
             <tr>
               <td className="gameover-table">
-                <Button handleClick={() => navigate('/game')} text='Continue game' className="gameover-buttons" />
+                <Button handleClick={continueGame} text='Continue game' className="gameover-buttons" />
               </td>
             </tr> : null
           }
