@@ -567,12 +567,14 @@ const App = () => {
           <tr>
             <td className="scoreboard-table">
               <Scoreboard
-                reset={handleReset}
                 name={name}
                 total={total}
                 subtotal={subtotal}
-                setTotal={setTotal}
-                setSubTotal={setSubTotal}
+                functions={{
+                  reset: handleReset,
+                  setTotal: setTotal,
+                  setSubTotal: setSubTotal
+                }}
               />
 
               <Button handleClick={backToMenu} text='Restart game' className="restart-container" />

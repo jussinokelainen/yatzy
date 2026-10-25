@@ -31,15 +31,19 @@ export async function getScores() {
     return data
 }
 
-type SelectButtonProps = {
-    position: any;
+type FunctionProps = {
     reset: Function;
-    idx: number;
     setTotal: Function,
     setSubTotal: Function,
 }
+
+type SelectButtonProps = {
+    position: any;
+    idx: number;
+    functions: FunctionProps
+}
 // React component used for the button/number of all items in the scoreboard
-function SelectButton({ position, reset, idx, setTotal, setSubTotal }: SelectButtonProps) {
+function SelectButton({ position, idx, functions }: SelectButtonProps) {
     const [clicked, setClicked] = useState(false)
     const [text, setText] = useState('select')
     async function setAsClicked() {
@@ -48,15 +52,15 @@ function SelectButton({ position, reset, idx, setTotal, setSubTotal }: SelectBut
         if (data_index !== undefined) {
             setText(data.scores[data_index])
         }
-        setTotal(data.total)
-        setSubTotal(data.subTotal)
+        functions.setTotal(data.total)
+        functions.setSubTotal(data.subTotal)
         setClicked(true)
     }
     async function handleClick() {
         if (rollCount_global != 0 && !DICE_ROLLING) {
             await makePOSTrequest(`selectItem/${position}`)
             await setAsClicked()
-            reset()
+            functions.reset()
         }
     }
     // Check if the current item was already clicked in data that
@@ -75,42 +79,40 @@ function SelectButton({ position, reset, idx, setTotal, setSubTotal }: SelectBut
 }
 
 type ScoreboardProps = {
-    reset: any,
     name: string,
     total: number,
     subtotal: number
-    setTotal: Function
-    setSubTotal: Function
+    functions: FunctionProps
 }
 
 // Main scoreboard React component
-export function Scoreboard({ reset, name, total, subtotal, setTotal, setSubTotal }: ScoreboardProps) {
+export function Scoreboard({ name, total, subtotal, functions }: ScoreboardProps) {
     return (
         <table className="scoreboard-container">
             <tbody className="scoreboard1-container">
                 <tr>
                     <td>{<div className='dices1'></div>}</td>
-                    <td><SelectButton position={"one"} reset={reset} idx={0} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"one"} idx={0} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices2'></div>}</td>
-                    <td><SelectButton position={"two"} reset={reset} idx={1} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"two"} idx={1} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices3'></div>}</td>
-                    <td><SelectButton position={"three"} reset={reset} idx={2} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"three"} idx={2} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices4'></div>}</td>
-                    <td><SelectButton position={"four"} reset={reset} idx={3} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"four"} idx={3} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices5'></div>}</td>
-                    <td><SelectButton position={"five"} reset={reset} idx={4} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"five"} idx={4} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='dices6'></div>}</td>
-                    <td><SelectButton position={"six"} reset={reset} idx={5} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"six"} idx={5} functions={functions} /></td>
                 </tr>
             </tbody>
             <tbody className="scoreboard2-container">
@@ -122,39 +124,39 @@ export function Scoreboard({ reset, name, total, subtotal, setTotal, setSubTotal
             <tbody className="scoreboard3-container">
                 <tr>
                     <td>{<div className='pair'></div>}</td>
-                    <td><SelectButton position={"pair"} reset={reset} idx={6} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"pair"} idx={6} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='doublepair'></div>}</td>
-                    <td><SelectButton position={"doublepair"} reset={reset} idx={7} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"doublepair"} idx={7} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='triples'></div>}</td>
-                    <td><SelectButton position={"triples"} reset={reset} idx={8} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"triples"} idx={8} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='quadruples'></div>}</td>
-                    <td><SelectButton position={"quadruples"} reset={reset} idx={9} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"quadruples"} idx={9} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='smallstraight'></div>}</td>
-                    <td><SelectButton position={"smallstraight"} reset={reset} idx={10} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"smallstraight"} idx={10} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='bigstraight'></div>}</td>
-                    <td><SelectButton position={"bigstraight"} reset={reset} idx={11} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"bigstraight"} idx={11} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='fullhouse'></div>}</td>
-                    <td><SelectButton position={"fullhouse"} reset={reset} idx={12} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"fullhouse"} idx={12} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='sattuma'></div>}</td>
-                    <td><SelectButton position={"mixed"} reset={reset} idx={13} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"mixed"} idx={13} functions={functions} /></td>
                 </tr>
                 <tr>
                     <td>{<div className='jatsi'></div>}</td>
-                    <td><SelectButton position={"quintuples"} reset={reset} idx={14} setTotal={setTotal} setSubTotal={setSubTotal} /></td>
+                    <td><SelectButton position={"quintuples"} idx={14} functions={functions} /></td>
                 </tr>
             </tbody>
             <tbody className="scoreboard4-container">
