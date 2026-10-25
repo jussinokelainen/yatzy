@@ -1,6 +1,6 @@
 import './App.css'
 import { Button, Button2 } from './buttons'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import {
   Navigate,
@@ -74,6 +74,13 @@ const App = () => {
 
   const [diceState, setDiceState] = useState([0, 0, 0, 0, 0]);
   const [lockState, setLockState] = useState([false, false, false, false, false]);
+  // Dice that have a lock request travelling to the server. The
+  // button only reacts to the answer of the server, so on a slow
+  // connection it looks dead while a request is on its way and the
+  // player presses it again. The second press would change the
+  // server a second time while the screen only has room for one
+  // change, so presses on a dice that is busy are dropped here.
+  const lockInFlight = useRef([false, false, false, false, false]);
   const [lbScores, setLbScores] = useState([]);
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
@@ -281,14 +288,79 @@ const App = () => {
     navigate('/menu')
   }
 
+  // Lock or unlock a single dice of the lock state without touching
+  // the others, so that the answer of a request for one dice can not
+  // overwrite the state of another dice that was changed in between
+  function setOneLock(i: number, locked: boolean) {
+    setLockState(prev => {
+      const newLocks = [...prev]
+      newLocks[i] = locked
+      return newLocks
+    })
+  }
+
+  // Read the lock states back from the server. Used when the answer
+  // to a lock request never arrived: the request itself may still
+  // have gone through, so guessing what happened would leave the
+  // screen and the server showing different things.
+  async function resyncLocks() {
+    const response = await makeGETrequest(`start`)
+    if (!response.ok) { throw new Error(`Server error: ${response.status}`) }
+    const data = await response.json();
+    if (!Array.isArray(data.locked)) { throw new Error('No lock states in the answer') }
+    setLockState(data.locked)
+  }
+
   // Toggle the locking of a dice
   async function toggleLock(i: number) {
-    if (diceState[i] != 0 && !DICE_ROLLING) {
-      const response = await makePOSTrequest(`lockDice/${i}`)
+    if (diceState[i] == 0 || DICE_ROLLING) { return }
+    // A press on a dice whose request is still travelling is
+    // dropped: the answer of the first press is still on its way
+    if (lockInFlight.current[i]) { return }
+
+    // The server is asked to set this exact state instead of
+    // toggling, so this is only a guess about the screen: if it
+    // turns out to be wrong, the answer of the server corrects it
+    const wanted = !lockState[i]
+    lockInFlight.current[i] = true
+    // Show the lock right away instead of waiting for the answer,
+    // so the button always reacts no matter how slow the network
+    setOneLock(i, wanted)
+
+    try {
+      const response = await makePOSTrequest(`lockDice/${i}`, { locked: wanted })
       if (await handleAuthError(response)) { return }
-      const newLocks = [...lockState]
-      newLocks[i] = !newLocks[i]
-      setLockState(newLocks)
+      if (!response.ok) {
+        // The server refused the request and changed nothing, so
+        // the state from before the press is the correct one
+        setOneLock(i, !wanted)
+        return
+      }
+      const data = await response.json();
+      // Only this dice is read from the answer, so that an answer
+      // of a request for another dice can not be overwritten with
+      // an older state
+      if (typeof data.locked?.[i] === 'boolean') {
+        setOneLock(i, data.locked[i])
+      }
+    } catch (error) {
+      // The request itself failed, so it may never have reached
+      // the server, or it may have gone through with the answer
+      // lost on the way back. Ask the server what happened
+      // instead of undoing the change blindly.
+      console.error('Error locking dice:', error)
+      try {
+        await resyncLocks()
+      } catch (syncError) {
+        // Even reading the state failed, so fall back to undoing
+        // the change: the screen then shows no lock at all and
+        // the player can simply press the button again, which
+        // sets the state on the server either way
+        console.error('Error reading lock states:', syncError)
+        setOneLock(i, !wanted)
+      }
+    } finally {
+      lockInFlight.current[i] = false
     }
   };
 

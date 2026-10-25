@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -21,7 +23,13 @@ func restartGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
-// Locks dice given as c.Param for the user of the request
+// Sets the lock of the dice given as c.Param for the user of the
+// request to the value given in the request body. The lock is set
+// instead of toggled so that sending the same request again, which
+// happens when an answer is slow or lost and the player presses the
+// button a second time, leaves the same state behind instead of
+// flipping the dice once more. The state that was saved is returned
+// so the client can show exactly what the server has.
 func lockDice(c *gin.Context) {
 	diceStr := c.Param("dice")
 	dice, err := strconv.Atoi(diceStr)
@@ -34,21 +42,33 @@ func lockDice(c *gin.Context) {
 		return
 	}
 
-	user, _ := getUserInfo(c)
-	currentGame, err := loadActiveGame(user.id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "no game in progress"})
+	// A pointer is used so that a missing value can be told apart
+	// from a request that explicitly wants the dice unlocked
+	var body struct {
+		Locked *bool `json:"locked"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil || body.Locked == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing lock state"})
 		return
 	}
 
-	dicearr := &currentGame.diceArray[dice]
-	dicearr.locked = !dicearr.locked
-	if err := saveGame(currentGame); err != nil {
+	user, _ := getUserInfo(c)
+	locked, err := setDiceLock(user.id, dice, *body.Locked)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "no game in progress"})
+			return
+		}
+		errout("Error saving dice lock")
+		errout(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save game"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"locked":  locked,
+	})
 }
 
 // Saves the selected scoreboard item for the user of the request.

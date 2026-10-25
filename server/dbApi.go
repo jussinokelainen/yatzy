@@ -215,6 +215,37 @@ func saveGame(game GameData) error {
 	return err
 }
 
+// Sets the lock of a single dice of the ongoing game of the given
+// user and returns the lock states of all five dice. Only that one
+// dice is written, so a request for another dice that is being
+// handled at the same time can not be overwritten with an older
+// array. Returns sql.ErrNoRows when the user has no game in progress.
+func setDiceLock(userID int64, dice int, locked bool) ([5]bool, error) {
+	var states [5]bool
+	var dicelocked pq.BoolArray
+
+	// Arrays are one based in postgres, so the index used everywhere
+	// else in the program is one smaller. The casts are needed
+	// because lib/pq sends every parameter as text.
+	sqlStatement := `
+		UPDATE games
+		SET dice_locked[$2::int] = $3::boolean
+		WHERE user_id = $1 AND status = 'in_progress'
+		RETURNING dice_locked;
+	`
+
+	err := db.QueryRow(sqlStatement, userID, dice+1, locked).Scan(&dicelocked)
+	if err != nil {
+		return states, err
+	}
+
+	for i := range states {
+		states[i] = dicelocked[i]
+	}
+
+	return states, nil
+}
+
 // Delete the ongoing game of the given user
 func deleteActiveGame(userID int64) error {
 	sqlStatement := `DELETE FROM games WHERE user_id = $1 AND status = 'in_progress';`
