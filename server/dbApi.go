@@ -134,7 +134,8 @@ func loadGame(userID int64, whereClause string) (GameData, error) {
 				FROM unnest(g.scores) WITH ORDINALITY AS t(s, o)),
 			dice,
 			dice_locked,
-			turn_count
+			turn_count,
+			roll_count
 		FROM games g
 		` + whereClause + `;`
 
@@ -145,6 +146,7 @@ func loadGame(userID int64, whereClause string) (GameData, error) {
 		&dicevalues,
 		&dicelocked,
 		&game.roundNum,
+		&game.roll_count,
 	)
 	if err != nil {
 		return game, err
@@ -170,7 +172,8 @@ func saveGame(game GameData) error {
 			scores,
 			dice,
 			dice_locked,
-			turn_count
+			turn_count,
+			roll_count
 		)
 		VALUES (
 			$1,
@@ -180,14 +183,16 @@ func saveGame(game GameData) error {
 			),
 			$4,
 			$5,
-			$6
+			$6,
+			$7
 		)
 		ON CONFLICT (user_id) WHERE status = 'in_progress'
 		DO UPDATE SET
 			scores = EXCLUDED.scores,
 			dice = EXCLUDED.dice,
 			dice_locked = EXCLUDED.dice_locked,
-			turn_count = EXCLUDED.turn_count
+			turn_count = EXCLUDED.turn_count,
+			roll_count = EXCLUDED.roll_count
 		RETURNING id;
 	`
 
@@ -200,6 +205,7 @@ func saveGame(game GameData) error {
 		pq.Array(dicevalues[:]),
 		pq.Array(dicelocked[:]),
 		game.roundNum,
+		game.roll_count,
 	).Scan(&game.id)
 	if err != nil {
 		errout("Error updating current game values")

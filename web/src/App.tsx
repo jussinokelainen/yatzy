@@ -251,8 +251,8 @@ const App = () => {
     preClicked = gameData.clickedrow
     setDiceState(gameData.dice)
     setLockState(gameData.locked)
-    setRollCount(0)
-    rollCount_global = 0
+    setRollCount(gameData.roll_count)
+    rollCount_global = gameData.roll_count
     setGameLoaded(true)
   }
 

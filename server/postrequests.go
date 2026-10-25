@@ -80,6 +80,7 @@ func itemSelector(c *gin.Context) {
 	currentGame.scorearray[itemInt] = val
 	currentGame.clickedarray[itemInt] = true
 	currentGame.roundNum += 1
+	currentGame.roll_count = 0
 	resetDice(&currentGame)
 
 	if err := saveGame(currentGame); err != nil {
@@ -103,7 +104,6 @@ func itemSelector(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		// scores
-		// total
 		// round number
 		"score":    val,
 		"total":    total,

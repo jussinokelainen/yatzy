@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS games (
 	dice        INTEGER[] NOT NULL DEFAULT '{0,0,0,0,0}',
 	dice_locked BOOLEAN[] NOT NULL DEFAULT '{f,f,f,f,f}',
 	turn_count  INTEGER NOT NULL DEFAULT 0,
+	roll_count  INTEGER NOT NULL DEFAULT 0,
 	total_score INTEGER,
 	started_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
 	finished_at TIMESTAMPTZ,

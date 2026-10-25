@@ -11,6 +11,7 @@ type GameData struct {
 	clickedarray [15]bool
 	diceArray    [5]DiceData
 	roundNum     int
+	roll_count   int
 }
 
 // Struct used by GameData to store dice state

@@ -70,6 +70,7 @@ func startGame(c *gin.Context) {
 		"roundnum":   currentGame.roundNum,
 		"dice":       values,
 		"locked":     locked,
+		"roll_count": currentGame.roll_count,
 	})
 }
 
@@ -91,6 +92,8 @@ func rollDice(c *gin.Context) {
 			dicearr[i].value = newVal
 		}
 	}
+
+	currentGame.roll_count += 1
 
 	// Update database to have current dice values,
 	// and return them as the response to the http request
