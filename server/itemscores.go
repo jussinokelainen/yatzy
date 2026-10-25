@@ -38,6 +38,7 @@ func calculateNumbers(dicearr [5]int, val int) int {
 }
 
 func calculatePair(dicearr [5]int) int {
+	sort.Ints(dicearr[:])
 	sum := 0
 	for i := 4; i >= 1; i-- {
 		if dicearr[i] == dicearr[i-1] {
