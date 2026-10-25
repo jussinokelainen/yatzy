@@ -50,10 +50,10 @@ function SelectButton({ position, idx, functions }: SelectButtonProps) {
         const data = await getScores()
         const data_index = indexTextToInt.get(position)
         if (data_index !== undefined) {
-            setText(data.scores[data_index])
+            setText(data.scorearray[data_index])
         }
         functions.setTotal(data.total)
-        functions.setSubTotal(data.subTotal)
+        functions.setSubTotal(data.subtotal)
         setClicked(true)
     }
     async function handleClick() {

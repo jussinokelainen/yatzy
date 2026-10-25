@@ -66,15 +66,13 @@ func startGame(c *gin.Context) {
 	total, sub_total := calculateTotal(currentGame)
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":    true,
-		"scorerow":   currentGame.scorearray,
-		"clickedrow": currentGame.clickedarray,
-		"roundnum":   currentGame.roundNum,
-		"dice":       values,
-		"locked":     locked,
-		"roll_count": currentGame.roll_count,
-		"total":      total,
-		"subtotal":   sub_total,
+		"success":      true,
+		"clickedarray": currentGame.clickedarray,
+		"dice":         values,
+		"locked":       locked,
+		"roll_count":   currentGame.roll_count,
+		"total":        total,
+		"subtotal":     sub_total,
 	})
 }
 
@@ -134,9 +132,9 @@ func getGameStats(c *gin.Context) {
 	total, subTotal := calculateTotal(currentGame)
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"scores":   currentGame.scorearray,
-		"total":    total,
-		"subTotal": subTotal,
+		"success":    true,
+		"scorearray": currentGame.scorearray,
+		"total":      total,
+		"subtotal":   subTotal,
 	})
 }

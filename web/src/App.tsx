@@ -257,7 +257,7 @@ const App = () => {
     if (await handleAuthError(response)) { return }
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const gameData = await response.json();
-    preClicked = gameData.clickedrow
+    preClicked = gameData.clickedarray
     setDiceState(gameData.dice)
     setLockState(gameData.locked)
     setRollCount(gameData.roll_count)
