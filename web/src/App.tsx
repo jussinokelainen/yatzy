@@ -288,16 +288,6 @@ const App = () => {
     navigate('/menu')
   }
 
-  // Lock or unlock a single dice of the lock state without touching
-  // the others, so that the answer of a request for one dice can not
-  // overwrite the state of another dice that was changed in between
-  function setOneLock(i: number, locked: boolean) {
-    setLockState(prev => {
-      const newLocks = [...prev]
-      newLocks[i] = locked
-      return newLocks
-    })
-  }
 
   // Read the lock states back from the server. Used when the answer
   // to a lock request never arrived: the request itself may still
@@ -323,25 +313,20 @@ const App = () => {
     // turns out to be wrong, the answer of the server corrects it
     const wanted = !lockState[i]
     lockInFlight.current[i] = true
-    // Show the lock right away instead of waiting for the answer,
-    // so the button always reacts no matter how slow the network
-    setOneLock(i, wanted)
 
     try {
       const response = await makePOSTrequest(`gameapi/lockdice/${i}`, { locked: wanted })
       if (await handleAuthError(response)) { return }
-      if (!response.ok) {
-        // The server refused the request and changed nothing, so
-        // the state from before the press is the correct one
-        setOneLock(i, !wanted)
-        return
-      }
       const data = await response.json();
       // Only this dice is read from the answer, so that an answer
       // of a request for another dice can not be overwritten with
       // an older state
       if (typeof data.locked?.[i] === 'boolean') {
-        setOneLock(i, data.locked[i])
+        setLockState(prev => {
+          const newLocks = [...prev]
+          newLocks[i] = data.locked[i]
+          return newLocks
+        })
       }
     } catch (error) {
       // The request itself failed, so it may never have reached
@@ -357,7 +342,6 @@ const App = () => {
         // the player can simply press the button again, which
         // sets the state on the server either way
         console.error('Error reading lock states:', syncError)
-        setOneLock(i, !wanted)
       }
     } finally {
       lockInFlight.current[i] = false
@@ -388,6 +372,13 @@ const App = () => {
   // Function that rolls the dice with visual client side rolling and
   // then setting the values to ones rolled by the server
   async function rollDice() {
+    // Check if any lock requests are pending, dont roll if so
+    for (let lock in lockInFlight.current) {
+      if (lockInFlight.current[lock]) {
+        return;
+      }
+    }
+
     if (rollCount >= 3 || DICE_ROLLING) {
       return;
     }
