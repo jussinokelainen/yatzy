@@ -122,10 +122,11 @@ func itemSelector(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"score":    val,
-		"total":    total,
-		"subtotal": subTotal,
-		"gameover": gameOver,
+		"success":     true,
+		"score":       val,
+		"total":       total,
+		"subtotal":    subTotal,
+		"gameover":    gameOver,
+		"roundnumber": currentGame.roundNum,
 	})
 }

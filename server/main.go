@@ -120,7 +120,6 @@ func main() {
 		game.POST("/selectitem/:what", itemSelector)
 
 		// GET requests
-		game.GET("/getroundnumber", getRound)
 		game.GET("/checkexistingprogress", checkExistingProgress)
 		game.GET("/start", startGame)
 		game.GET("/rolldice", rollDice)

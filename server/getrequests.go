@@ -9,25 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Function that returns the current round the game is on
-// as the response to the request
-func getRound(c *gin.Context) {
-	user, _ := getUserInfo(c)
-	currentGame, err := loadActiveGame(user.id)
-	if errors.Is(err, sql.ErrNoRows) {
-		// The game may have just been finished
-		currentGame, err = loadLatestFinishedGame(user.id)
-	}
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "no game in progress"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"roundnumber": currentGame.roundNum,
-	})
-}
-
 // Function that checks whether the user of the request has
 // an ongoing game they have already played at least one round of
 func checkExistingProgress(c *gin.Context) {

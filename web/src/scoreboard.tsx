@@ -1,5 +1,6 @@
 import { makePOSTrequest, makeGETrequest } from "./requests";
-import { rollCount_global, DICE_ROLLING } from "./App";
+import { rollCount_global, DICE_ROLLING, MAXROUND } from "./App";
+import { useNavigate } from "react-router-dom";
 
 // Function to get the score of current client id
 export async function getScores() {
@@ -29,6 +30,7 @@ type SelectButtonProps = {
 // React component used for the button/number of all items in the scoreboard.
 // What the cell shows comes from the score and clicked props
 function SelectButton({ position, idx, score, clicked, functions }: SelectButtonProps) {
+    const navigate = useNavigate()
     async function handleClick() {
         if (rollCount_global != 0 && !DICE_ROLLING) {
             const response = await makePOSTrequest(`gameapi/selectitem/${position}`)
@@ -46,6 +48,10 @@ function SelectButton({ position, idx, score, clicked, functions }: SelectButton
             functions.setTotal(data.total)
             functions.setSubTotal(data.subtotal)
             functions.reset()
+            if (data.roundnumber >= MAXROUND) {
+                // The end screen reads the final score itself
+                navigate('/end')
+            }
         }
     }
 

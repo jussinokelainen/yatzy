@@ -14,7 +14,7 @@ import { Scoreboard, getScores } from './scoreboard'
 
 export let DICE_ROLLING = false
 
-const MAXROUND = 15
+export const MAXROUND = 15
 
 // The scoreboard cells are shown from these arrays: they are read
 // from the server once per game, instead of every cell asking for
@@ -447,14 +447,6 @@ const App = () => {
     setDiceState([0, 0, 0, 0, 0])
     setRollCount(0)
     rollCount_global = 0
-    const response = await makeGETrequest(`gameapi/getroundnumber`)
-    if (await handleAuthError(response)) { return }
-    if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
-    const roundNum = await response.json();
-    if (roundNum.roundnumber >= MAXROUND) {
-      // The end screen reads the final score itself
-      navigate('/end')
-    }
   }
 
   // The url does not mean anything until it is known who is
