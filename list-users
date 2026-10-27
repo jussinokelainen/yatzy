@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Simple script to list either allowed or non-allowed users
+# As an argument the script takes either 'true' or 'false',
+# indicating whether the user is allowed to play or not
+
+if [[ -z $1 ]]; then
+	echo "Argument for allowed required!"
+	exit 2
+fi
+
+. ./.env
+
+ALLOWED=$1
+if [[ $ALLOWED != "true" && $ALLOWED != "false" ]]; then
+	echo "Argument must be 'true' or 'false'"
+	exit 2
+fi
+
+printf "Users with allowed set to $ALLOWED:\n\n"
+docker compose exec db psql -U $DATABASE_USER -d $DATABASE_NAME -c "SELECT * FROM users WHERE allowed=$ALLOWED;"
