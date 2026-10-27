@@ -68,6 +68,7 @@ func startGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":      true,
 		"clickedarray": currentGame.clickedarray,
+		"scorearray":   currentGame.scorearray,
 		"dice":         values,
 		"locked":       locked,
 		"roll_count":   currentGame.roll_count,

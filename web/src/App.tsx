@@ -16,10 +16,17 @@ export let DICE_ROLLING = false
 
 const MAXROUND = 15
 
-// Global data to load already clicked items into
-// when loading progress, and global turn count
-export let preClicked: Record<number, boolean> = {}
+// The scoreboard cells are shown from these arrays: they are read
+// from the server once per game, instead of every cell asking for
+// the scores of the whole game again while the board renders.
+// Global turn count is kept separately, it is changed outside
+// of React state on purpose.
 export let rollCount_global: number = 0
+
+// Fresh copies of the scoreboard state. React state is replaced
+// instead of changed, so a new array is made every time.
+const newScores = (): number[] => Array(15).fill(0)
+const newClicked = (): boolean[] => Array(15).fill(false)
 
 // Map to connect dice with their corresponding image names
 const diceImages = new Map([
@@ -85,6 +92,9 @@ const App = () => {
   const [rollCount, setRollCount] = useState(0);
   const [total, setTotal] = useState(0)
   const [subtotal, setSubTotal] = useState(0)
+  // Scores of the scoreboard cells and which of them are selected,
+  const [scores, setScores] = useState<number[]>(newScores)
+  const [clickedRows, setClickedRows] = useState<boolean[]>(newClicked)
   // False while the game is being read from the server, so that
   // /game does not flash an empty scoreboard for a moment
   const [gameLoaded, setGameLoaded] = useState(false)
@@ -234,6 +244,8 @@ const App = () => {
     rollCount_global = 0
     setTotal(0)
     setSubTotal(0)
+    setScores(newScores())
+    setClickedRows(newClicked())
     setGameLoaded(false)
   }
 
@@ -257,7 +269,11 @@ const App = () => {
     if (await handleAuthError(response)) { return }
     if (!response.ok) { throw new Error(`Server error: ${response.status}`); }
     const gameData = await response.json();
-    preClicked = gameData.clickedarray
+    // The whole scoreboard is read from this one answer, so the
+    // cells do not have to ask for the scores again while they
+    // are being rendered
+    setScores(Array.isArray(gameData.scorearray) ? gameData.scorearray : newScores())
+    setClickedRows(Array.isArray(gameData.clickedarray) ? gameData.clickedarray : newClicked())
     setDiceState(gameData.dice)
     setLockState(gameData.locked)
     setRollCount(gameData.roll_count)
@@ -407,6 +423,22 @@ const App = () => {
     setRollCount(prevCount => prevCount + 1);
     rollCount_global += 1
   };
+
+  // Remember the score the server calculated for a scoreboard cell
+  // that the player just selected, so the cell shows it and the
+  // rest of the board reads the scores from here
+  function markSelected(idx: number, score: number) {
+    setScores(prev => {
+      const next = [...prev]
+      next[idx] = score
+      return next
+    })
+    setClickedRows(prev => {
+      const next = [...prev]
+      next[idx] = true
+      return next
+    })
+  }
 
   // Function that handles resetting client side game state
   // after selecting an item
@@ -638,10 +670,13 @@ const App = () => {
                 name={name}
                 total={total}
                 subtotal={subtotal}
+                scores={scores}
+                clicked={clickedRows}
                 functions={{
                   reset: handleReset,
                   setTotal: setTotal,
-                  setSubTotal: setSubTotal
+                  setSubTotal: setSubTotal,
+                  markSelected: markSelected
                 }}
               />
 

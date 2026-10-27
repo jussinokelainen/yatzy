@@ -108,7 +108,7 @@ func itemSelector(c *gin.Context) {
 		return
 	}
 
-	total, _ := calculateTotal(currentGame)
+	total, subTotal := calculateTotal(currentGame)
 
 	// Check if the game is over
 	gameOver := currentGame.roundNum >= MAX_ROUND
@@ -122,11 +122,10 @@ func itemSelector(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		// scores
-		// round number
+		"success":  true,
 		"score":    val,
 		"total":    total,
+		"subtotal": subTotal,
 		"gameover": gameOver,
 	})
 }
