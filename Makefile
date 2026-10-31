@@ -18,7 +18,8 @@ server:
 
 	@mkdir -p ./bin
 	@mkdir -p ./logs
-	@cd ./server/ && CGO_ENABLED=0 GOOS=linux go build -o ../bin/server
+	@cd ./server/ && cargo build --release
+	@cp ./server/target/release/server ./bin/server
 	@printf "[\e[32m OK \e[0m] Compiling server done\n"
 	@echo
 
@@ -36,12 +37,12 @@ web/node_modules: ./web/package-lock.json
 	@cd ./web/ && npm ci
 
 clean:
-	@printf "\e[31mCleaning up...\e[0m"
+	@printf "\e[31mCleaning up...\e[0m\n"
 	@rm -rf ./bin/
 	@rm -rf ./logs/
 	@rm -rf ./web/node_modules/
 	@rm -rf ./web/dist/
-	@rm -rf ./bin/
+	@cd ./server/ && cargo clean
 	@printf "\r\e[0K"
 	@echo
 	@printf "[\e[32m OK \e[0m] Cleaning done\n"
