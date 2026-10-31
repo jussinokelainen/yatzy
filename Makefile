@@ -2,7 +2,7 @@
 
 build: server web
 
-restart: build
+restart: web
 	@printf "[\e[35m INFO \e[0m] Checking for existing server...\n"
 	@echo
 	@docker compose down
