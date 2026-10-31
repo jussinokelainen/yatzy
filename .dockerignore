@@ -1,0 +1,10 @@
+# Not needed inside the build
+.git
+.env
+logs
+bin
+
+# Built on the host or inside docker, not copied into the image
+server/target
+server-go
+web/node_modules

@@ -15,6 +15,9 @@ dist-ssr
 # Binaries
 bin/
 
+# Rust build output
+server/target
+
 # Editor directories and files
 .DS_Store
 TODO.md
