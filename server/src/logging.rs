@@ -80,7 +80,7 @@ pub async fn log_request(request: Request, next: Next) -> Response {
     let status = response.status().as_u16();
     raw(&format!(
         "[LOG] {} | {} | {:>27} | {:>40} | {} \"{}\"",
-        Local::now().format("%Y/%m/%d"),
+        Local::now().format("%Y/%m/%d %H:%M:%S"),
         colored_status(status),
         format!("\x1b[90m\x1b[47m {:?} \x1b[0m", start.elapsed()),
         ip,
