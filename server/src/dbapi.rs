@@ -1,6 +1,7 @@
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::Response;
+use chrono::{DateTime, Local};
 use serde::Serialize;
 use tokio_postgres::error::SqlState;
 
@@ -321,6 +322,7 @@ pub async fn finish_game(state: &AppState, user_id: i64, total_score: i32) -> Db
 pub struct TopScore {
     pub name: String,
     pub score: i32,
+    pub time: String,
 }
 
 #[derive(Serialize)]
@@ -351,12 +353,19 @@ async fn fetch_top_scores(state: &AppState) -> DbResult<Vec<TopScore>> {
     let client = state.pool.get().await?;
     let rows = client
         .query(
-            "SELECT u.username, g.total_score
-			FROM games g
-			JOIN users u ON u.id = g.user_id
-			WHERE g.status = 'finished'
-			ORDER BY g.total_score DESC
-			LIMIT 20;",
+            "SELECT
+                u.username,
+                g.total_score,
+                g.finished_at
+            FROM
+                games g
+            JOIN
+                users u ON u.id = g.user_id
+            WHERE
+                g.status = 'finished'
+            ORDER BY
+                g.total_score DESC
+            LIMIT 20;",
             &[],
         )
         .await?;
@@ -366,6 +375,10 @@ async fn fetch_top_scores(state: &AppState) -> DbResult<Vec<TopScore>> {
         .map(|row| TopScore {
             name: row.get(0),
             score: row.get::<_, Option<i32>>(1).unwrap_or(0),
+            time: row
+                .get::<_, DateTime<Local>>(2)
+                .format("%d-%m-%Y")
+                .to_string(),
         })
         .collect())
 }

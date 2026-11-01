@@ -736,9 +736,8 @@ const App = () => {
         </div>
     );
 
-    // The user leaderboard has an extra column for the number of games
     const showTotalGames = pathname === "/leaderboard/users";
-    const lbWidth = showTotalGames ? 4 : 3;
+    const lbWidth = 4;
 
     const leaderboardScreen = (
         <div>
@@ -763,7 +762,11 @@ const App = () => {
                             <td className="leaderboard-table">
                                 <p>Games</p>
                             </td>
-                        ) : null}
+                        ) : (
+                            <td className="leaderboard-table">
+                                <p>Date</p>
+                            </td>
+                        )}
                     </tr>
                     {lbScores.map((score: any, index: number) => (
                         <tr key={index}>
@@ -774,7 +777,11 @@ const App = () => {
                                 <td className="leaderboard-table">
                                     {score.count}
                                 </td>
-                            ) : null}
+                            ) : (
+                                <td className="leaderboard-table">
+                                    {score.time}
+                                </td>
+                            )}
                         </tr>
                     ))}
                     <tr>
